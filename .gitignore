@@ -5,6 +5,10 @@
 *.obj
 *.class
 
+# Third-party library binaries
+**/SFML*/
+*.dll
+
 # IDE & System files
 .vscode/
 .idea/
