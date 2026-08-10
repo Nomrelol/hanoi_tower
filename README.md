@@ -1,45 +1,60 @@
-# Tower of Hanoi - Project Version Hub
+# Tower of Hanoi - Complete Project Workspace
 
-This repository contains multiple implementations of the **Tower of Hanoi** problem, organized into Git branches so you can easily switch based on your teacher's requirements.
+This repository contains all implementations of the **Tower of Hanoi** problem organized cleanly into subdirectories so you can explore, edit, and compare them simultaneously in your code editor.
 
-> 📘 **Detailed Technical Guide**: Read [CHALLENGES_AND_SOLUTIONS.md](file:///c:/Users/Dell/Desktop/proj/CHALLENGES_AND_SOLUTIONS.md) for a full breakdown of all teacher constraints, compiler issues, design decisions, and solutions across all branches.
-
----
-
-## 🔀 Available Versions & How to Switch
-
-You can switch between any version anytime using the command `git checkout <branch-name>`:
-
-| Branch Name | Language | Main Features | Teacher / Use Case |
-| :--- | :--- | :--- | :--- |
-| **`cpp-iostream-only`** | C++ | **ONLY `#include <iostream>`**<br>- No extra libraries/headers<br>- Custom `Stack` (No STL)<br>- Pure C++ delay loop & screen refresh | **Best for strict teachers** who forbid external libraries/headers. |
-| **`cpp-win32-gui`** | C++ | **Native Windows Desktop GUI Window**<br>- Zero 3rd-party downloads needed!<br>- Double-buffered smooth graphics (`-lgdi32`) | Best for native desktop GUI window presentation without downloading SFML. |
-| **`cpp-sfml-graphics`** | C++ | **SFML 2D GUI Window Animation**<br>- 2D graphical window with smooth 3-phase disk sliding<br>- Color palette & live HUD text<br>- 1-click `build.bat` script | Best for rich graphical demonstration using SFML. |
-| **`cpp-windows-color`** | C++ | **`<windows.h>` + Console Colors**<br>- Vibrant color-coded disks<br>- Accurate `Sleep()` delays<br>- Custom `Stack` (No STL) | Best for colored terminal visual presentations. |
-| **`java-version`** | Java | **Pure Java (`TowerOfHanoi.java`)**<br>- Star (`*`) block graphic disk rendering<br>- Clean OOP recursion | Best if your teacher requests a Java submission. |
+> 📘 **Detailed Technical Guide**: Read [CHALLENGES_AND_SOLUTIONS.md](file:///c:/Users/Dell/Desktop/proj/CHALLENGES_AND_SOLUTIONS.md) for a full breakdown of teacher constraints, custom stack algorithms, viva defense notes, and compiler setups.
 
 ---
 
-## 💻 Quick Switching Commands
+## 📁 Directory Structure & Implementations
 
-```bash
-# Pure C++ (iostream ONLY)
-git checkout cpp-iostream-only
-
-# Native Windows Desktop GUI Window (Zero Downloads)
-git checkout cpp-win32-gui
-
-# SFML 2D Graphical Animation
-git checkout cpp-sfml-graphics
-
-# Windows Colored Terminal
-git checkout cpp-windows-color
-
-# Java Version
-git checkout java-version
+```text
+proj/
+├── 01_cpp_iostream_only/   # Pure standard C++ (#include <iostream> ONLY, zero extra headers)
+├── 02_cpp_win32_gui/       # Native Windows Desktop GUI Window (-lgdi32, zero 3rd-party downloads)
+├── 03_cpp_sfml_graphics/   # SFML 2D GUI Window Animation + 1-click build.bat
+├── 04_cpp_windows_color/   # Console colorful visualizer (<windows.h> + Sleep)
+├── 05_java_version/        # Pure Java implementation (TowerOfHanoi.java)
+├── CHALLENGES_AND_SOLUTIONS.md  # Complete technical challenge & solution guide
+└── README.md               # Project hub overview
 ```
 
 ---
 
-## 📖 Defense Cheat Sheet
-Each branch includes a tailored `EXPLANATION.md` file explaining the code line-by-line for viva/oral exams.
+## 🚀 How to Run Each Implementation
+
+### 1. Pure C++ (`iostream` ONLY)
+```powershell
+cd 01_cpp_iostream_only
+g++ main.cpp -o hanoi.exe
+.\hanoi.exe
+```
+
+### 2. Native Windows Desktop GUI Window (Zero Setup!)
+```powershell
+cd 02_cpp_win32_gui
+g++ main.cpp -o hanoi_gui.exe -lgdi32 -mwindows
+.\hanoi_gui.exe
+```
+
+### 3. SFML 2D Graphical Animation
+```powershell
+cd 03_cpp_sfml_graphics
+# Paste your downloaded SFML folder inside 03_cpp_sfml_graphics/
+.\build.bat
+.\hanoi.exe
+```
+
+### 4. Windows Colored Console
+```powershell
+cd 04_cpp_windows_color
+g++ main.cpp -o hanoi.exe
+.\hanoi.exe
+```
+
+### 5. Java Version
+```powershell
+cd 05_java_version
+javac TowerOfHanoi.java
+java TowerOfHanoi
+```
