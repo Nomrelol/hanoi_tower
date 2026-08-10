@@ -1,0 +1,10 @@
+# Executables & Binaries
+*.exe
+*.o
+*.obj
+*.class
+
+# IDE & System files
+.vscode/
+.idea/
+.agent/
