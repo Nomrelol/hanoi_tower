@@ -1,4 +1,5 @@
-# Executables & Binaries
+# Build Output Isolation Directories
+**/bin/
 *.exe
 *.o
 *.obj

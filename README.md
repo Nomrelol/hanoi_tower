@@ -1,8 +1,8 @@
-# Tower of Hanoi - Complete Project Workspace
+# Tower of Hanoi - Professional Project Workspace
 
-This repository contains all implementations of the **Tower of Hanoi** problem organized cleanly into subdirectories so you can explore, edit, and compare them simultaneously in your code editor.
+This repository contains all implementations of the **Tower of Hanoi** problem organized according to professional software engineering standards (kebab-case directory naming, isolated `bin/` build outputs, and zero-pollution source trees).
 
-> 📘 **Detailed Technical Guide**: Read [CHALLENGES_AND_SOLUTIONS.md](file:///c:/Users/Dell/Desktop/proj/CHALLENGES_AND_SOLUTIONS.md) for a full breakdown of teacher constraints, custom stack algorithms, viva defense notes, and compiler setups.
+> 📘 **Detailed Technical Guide**: Read [CHALLENGES_AND_SOLUTIONS.md](file:///c:/Users/Dell/Desktop/proj/CHALLENGES_AND_SOLUTIONS.md) for a full breakdown of compiler ABI mangling (GCC vs MSVC), custom stack algorithms, viva defense notes, and directory hygiene.
 
 ---
 
@@ -10,13 +10,13 @@ This repository contains all implementations of the **Tower of Hanoi** problem o
 
 ```text
 proj/
-├── 01_cpp_iostream_only/   # Pure standard C++ (#include <iostream> ONLY, zero extra headers)
-├── 02_cpp_win32_gui/       # Native Windows Desktop GUI Window (-lgdi32, zero 3rd-party downloads)
-├── 03_cpp_sfml_graphics/   # SFML 2D GUI Window Animation + 1-click build.bat
-├── 04_cpp_windows_color/   # Console colorful visualizer (<windows.h> + Sleep)
-├── 05_java_version/        # Pure Java implementation (TowerOfHanoi.java)
-├── CHALLENGES_AND_SOLUTIONS.md  # Complete technical challenge & solution guide
-└── README.md               # Project hub overview
+├── 01-cpp-iostream/        # Pure standard C++ (#include <iostream> ONLY, zero extra headers)
+├── 02-cpp-win32-gui/        # Native Windows Desktop GUI Window (-lgdi32, zero 3rd-party downloads)
+├── 03-cpp-sfml-graphics/    # SFML 2D GUI Window Animation + 1-click build.bat
+├── 04-cpp-windows-color/    # Console colorful visualizer (<windows.h> + Sleep)
+├── 05-java-console/         # Pure Java implementation (TowerOfHanoi.java)
+├── CHALLENGES_AND_SOLUTIONS.md  # Complete technical challenge & ABI guide
+└── README.md                # Project hub overview
 ```
 
 ---
@@ -25,36 +25,36 @@ proj/
 
 ### 1. Pure C++ (`iostream` ONLY)
 ```powershell
-cd 01_cpp_iostream_only
-g++ main.cpp -o hanoi.exe
-.\hanoi.exe
+cd 01-cpp-iostream
+g++ main.cpp -o bin/hanoi-iostream.exe
+.\bin\hanoi-iostream.exe
 ```
 
 ### 2. Native Windows Desktop GUI Window (Zero Setup!)
 ```powershell
-cd 02_cpp_win32_gui
-g++ main.cpp -o hanoi_gui.exe -lgdi32 -mwindows
-.\hanoi_gui.exe
+cd 02-cpp-win32-gui
+g++ main.cpp -o bin/hanoi-win32-gui.exe -lgdi32 -mwindows
+.\bin\hanoi-win32-gui.exe
 ```
 
 ### 3. SFML 2D Graphical Animation
 ```powershell
-cd 03_cpp_sfml_graphics
-# Paste your downloaded SFML folder inside 03_cpp_sfml_graphics/
+cd 03-cpp-sfml-graphics
+# Paste your downloaded GCC MinGW SFML folder inside 03-cpp-sfml-graphics/
 .\build.bat
-.\hanoi.exe
+.\bin\hanoi-sfml.exe
 ```
 
 ### 4. Windows Colored Console
 ```powershell
-cd 04_cpp_windows_color
-g++ main.cpp -o hanoi.exe
-.\hanoi.exe
+cd 04-cpp-windows-color
+g++ main.cpp -o bin/hanoi-win-color.exe
+.\bin\hanoi-win-color.exe
 ```
 
 ### 5. Java Version
 ```powershell
-cd 05_java_version
-javac TowerOfHanoi.java
-java TowerOfHanoi
+cd 05-java-console
+javac -d bin TowerOfHanoi.java
+java -cp bin TowerOfHanoi
 ```
