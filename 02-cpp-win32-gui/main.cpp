@@ -1,6 +1,4 @@
 #include <windows.h>
-#include <cstdio>
-#include <cstring>
 
 const int MAX_DISKS = 8;
 const int WIN_W     = 850;
@@ -10,7 +8,7 @@ const int BASE_Y    = 420;
 const int ROD_H     = 240;
 const int DISK_H    = 22;
 
-// Array-based stack — built from scratch, no STL
+// Stack implementation for disk tower
 struct Tower {
     int  d[MAX_DISKS];
     int  top = -1;
@@ -21,6 +19,51 @@ struct Tower {
     int  size()       { return top + 1; }
     int  at(int lvl)  { return (lvl >= 0 && lvl <= top) ? d[lvl] : 0; }
 };
+
+// Helper functions for string formatting
+int myStrLen(const char* s) {
+    int len = 0;
+    while (s[len] != '\0') len++;
+    return len;
+}
+
+void myStrCopy(char* dst, const char* src) {
+    int i = 0;
+    while (src[i] != '\0') { dst[i] = src[i]; i++; }
+    dst[i] = '\0';
+}
+
+void myStrAppend(char* dst, const char* src) {
+    int end = myStrLen(dst);
+    int i = 0;
+    while (src[i] != '\0') { dst[end + i] = src[i]; i++; }
+    dst[end + i] = '\0';
+}
+
+void myStrAppendChar(char* dst, char c) {
+    int end = myStrLen(dst);
+    dst[end] = c;
+    dst[end + 1] = '\0';
+}
+
+void myIntToStr(int num, char* buf) {
+    if (num == 0) { buf[0] = '0'; buf[1] = '\0'; return; }
+    bool neg = false;
+    if (num < 0) { neg = true; num = -num; }
+    char tmp[16];
+    int i = 0;
+    while (num > 0) { tmp[i++] = '0' + (num % 10); num /= 10; }
+    int pos = 0;
+    if (neg) buf[pos++] = '-';
+    for (int j = i - 1; j >= 0; j--) buf[pos++] = tmp[j];
+    buf[pos] = '\0';
+}
+
+void myStrAppendInt(char* dst, int num) {
+    char tmp[16];
+    myIntToStr(num, tmp);
+    myStrAppend(dst, tmp);
+}
 
 Tower rodA, rodB, rodC;
 int   totalDisks = 4;
@@ -49,7 +92,9 @@ void reset(int n) {
     solved     = false;
     rodA.top = rodB.top = rodC.top = -1;
     for (int i = n; i >= 1; i--) rodA.push(i);
-    sprintf(statusMsg, "Disks: %d  |  Keys 1-8: change  |  SPACE: start  |  UP/DOWN: speed", n);
+    myStrCopy(statusMsg, "Disks: ");
+    myStrAppendInt(statusMsg, n);
+    myStrAppend(statusMsg, "  |  Keys 1-8: change  |  SPACE: start  |  UP/DOWN: speed");
 }
 
 void paint(HDC hdc) {
@@ -74,7 +119,8 @@ void paint(HDC hdc) {
     for (int i = 0; i < 3; i++) {
         RECT rod = { ROD_X[i] - 6, BASE_Y - ROD_H, ROD_X[i] + 6, BASE_Y };
         FillRect(mem, &rod, br);
-        char lbl[8]; sprintf(lbl, "ROD %c", rodNames[i]);
+        char lbl[8] = "ROD ";
+        myStrAppendChar(lbl, rodNames[i]);
         SetTextColor(mem, RGB(241, 196, 15));
         TextOutA(mem, ROD_X[i] - 18, BASE_Y + 24, lbl, 5);
     }
@@ -103,15 +149,18 @@ void paint(HDC hdc) {
     // HUD text
     SetTextColor(mem, RGB(52, 152, 219));
     const char* title = "TOWER OF HANOI - NATIVE WIN32 GUI";
-    TextOutA(mem, 260, 18, title, (int)strlen(title));
+    TextOutA(mem, 260, 18, title, myStrLen(title));
 
-    char hud[128];
-    sprintf(hud, "Step: %d  |  Speed: %dms", stepCount, delayMs);
+    char hud[128] = "Step: ";
+    myStrAppendInt(hud, stepCount);
+    myStrAppend(hud, "  |  Speed: ");
+    myStrAppendInt(hud, delayMs);
+    myStrAppend(hud, "ms");
     SetTextColor(mem, RGB(255, 255, 255));
-    TextOutA(mem, 50, 52, hud, (int)strlen(hud));
+    TextOutA(mem, 50, 52, hud, myStrLen(hud));
 
     SetTextColor(mem, RGB(241, 196, 15));
-    TextOutA(mem, 50, 78, statusMsg, (int)strlen(statusMsg));
+    TextOutA(mem, 50, 78, statusMsg, myStrLen(statusMsg));
 
     BitBlt(hdc, 0, 0, WIN_W, WIN_H, mem, 0, 0, SRCCOPY);
     DeleteObject(bmp);
@@ -138,7 +187,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
                 }
                 if (wp == VK_SPACE) {
                     running = true;
-                    sprintf(statusMsg, "Animating...  |  Speed: %dms  |  UP/DOWN to adjust", delayMs);
+                    myStrCopy(statusMsg, "Animating...  |  Speed: ");
+                    myStrAppendInt(statusMsg, delayMs);
+                    myStrAppend(statusMsg, "ms  |  UP/DOWN to adjust");
                     InvalidateRect(hwnd, NULL, FALSE);
                 }
             }
@@ -161,7 +212,12 @@ bool moveDisk(Tower &src, Tower &dst, char from, char to) {
     int disk = src.pop();
     dst.push(disk);
     stepCount++;
-    sprintf(statusMsg, "Moved Disk [%d]  %c -> %c", disk, from, to);
+    myStrCopy(statusMsg, "Moved Disk [");
+    myStrAppendInt(statusMsg, disk);
+    myStrAppend(statusMsg, "]  ");
+    myStrAppendChar(statusMsg, from);
+    myStrAppend(statusMsg, " -> ");
+    myStrAppendChar(statusMsg, to);
     HDC hdc = GetDC(g_hwnd);
     paint(hdc);
     ReleaseDC(g_hwnd, hdc);
@@ -208,7 +264,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int show) {
             solve(totalDisks, rodA, rodB, rodC, 'A', 'B', 'C');
             if (g_hwnd && IsWindow(g_hwnd)) {
                 solved = true;
-                sprintf(statusMsg, "SOLVED IN %d MOVES!  Press R to reset.", stepCount);
+                myStrCopy(statusMsg, "SOLVED IN ");
+                myStrAppendInt(statusMsg, stepCount);
+                myStrAppend(statusMsg, " MOVES!  Press R to reset.");
                 HDC hdc = GetDC(g_hwnd);
                 paint(hdc);
                 ReleaseDC(g_hwnd, hdc);
