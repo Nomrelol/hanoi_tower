@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <string>
 
 using namespace std;
 
@@ -9,7 +8,7 @@ const int MAX_DISKS = 8;
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 650;
 
-// Custom Stack Structure (Built from scratch: NO STL vector/stack used)
+// Stack implementation for disk tower
 struct Stack {
     int arr[MAX_DISKS];
     int top = -1;
@@ -39,6 +38,51 @@ struct Stack {
     void clear() { top = -1; }
 };
 
+// Helper functions for string formatting
+int myStrLen(const char* s) {
+    int len = 0;
+    while (s[len] != '\0') len++;
+    return len;
+}
+
+void myStrCopy(char* dst, const char* src) {
+    int i = 0;
+    while (src[i] != '\0') { dst[i] = src[i]; i++; }
+    dst[i] = '\0';
+}
+
+void myStrAppend(char* dst, const char* src) {
+    int end = myStrLen(dst);
+    int i = 0;
+    while (src[i] != '\0') { dst[end + i] = src[i]; i++; }
+    dst[end + i] = '\0';
+}
+
+void myStrAppendChar(char* dst, char c) {
+    int end = myStrLen(dst);
+    dst[end] = c;
+    dst[end + 1] = '\0';
+}
+
+void myIntToStr(int num, char* buf) {
+    if (num == 0) { buf[0] = '0'; buf[1] = '\0'; return; }
+    bool neg = false;
+    if (num < 0) { neg = true; num = -num; }
+    char tmp[16];
+    int i = 0;
+    while (num > 0) { tmp[i++] = '0' + (num % 10); num /= 10; }
+    int pos = 0;
+    if (neg) buf[pos++] = '-';
+    for (int j = i - 1; j >= 0; j--) buf[pos++] = tmp[j];
+    buf[pos] = '\0';
+}
+
+void myStrAppendInt(char* dst, int num) {
+    char tmp[16];
+    myIntToStr(num, tmp);
+    myStrAppend(dst, tmp);
+}
+
 // Rod Base Geometry
 const float ROD_X[3] = { 220.f, 500.f, 780.f };
 const float BASE_Y = 520.f;
@@ -52,7 +96,7 @@ int stepCounter = 0;
 int moveSpeedMs = 300; // Animation speed in milliseconds
 bool isPaused = false;
 bool isSolving = false;
-string statusText = "Press SPACE to start | Keys 1-8 for disks | UP/DOWN for speed | R to reset";
+char statusText[256] = "Press SPACE to start | Keys 1-8 for disks | UP/DOWN for speed | R to reset";
 
 // Vibrant Color Palette for Disks
 sf::Color diskPalette[8] = {
@@ -85,7 +129,7 @@ void resetPuzzle(int disks) {
     for (int i = totalDisks; i >= 1; i--) {
         rodA.push(i);
     }
-    statusText = "Press SPACE to start | Keys 1-8 for disks | UP/DOWN for speed | R to reset";
+    myStrCopy(statusText, "Press SPACE to start | Keys 1-8 for disks | UP/DOWN for speed | R to reset");
 }
 
 // Function to render full SFML graphic scene
@@ -109,7 +153,9 @@ void renderScene(sf::RenderWindow &window, sf::Font &font, bool hasFont) {
         if (hasFont) {
             sf::Text label;
             label.setFont(font);
-            label.setString(string("ROD ") + rodNames[i]);
+            char rodLabel[8] = "ROD ";
+            myStrAppendChar(rodLabel, rodNames[i]);
+            label.setString(rodLabel);
             label.setCharacterSize(22);
             label.setStyle(sf::Text::Bold);
             label.setFillColor(sf::Color(241, 196, 15));
@@ -138,7 +184,9 @@ void renderScene(sf::RenderWindow &window, sf::Font &font, bool hasFont) {
                 if (hasFont) {
                     sf::Text diskNum;
                     diskNum.setFont(font);
-                    diskNum.setString(to_string(diskSize));
+                    char diskStr[4];
+                    myIntToStr(diskSize, diskStr);
+                    diskNum.setString(diskStr);
                     diskNum.setCharacterSize(14);
                     diskNum.setFillColor(sf::Color::White);
                     diskNum.setPosition(ROD_X[r] - 4.f, BASE_Y - ((level + 1) * DISK_HEIGHT) + 2.f);
@@ -161,8 +209,16 @@ void renderScene(sf::RenderWindow &window, sf::Font &font, bool hasFont) {
 
         sf::Text status;
         status.setFont(font);
-        status.setString("Disks: " + to_string(totalDisks) + " | Step: " + to_string(stepCounter) + 
-                         " / " + to_string((1 << totalDisks) - 1) + " | Speed: " + to_string(moveSpeedMs) + "ms");
+        char statusBuf[128] = "Disks: ";
+        myStrAppendInt(statusBuf, totalDisks);
+        myStrAppend(statusBuf, " | Step: ");
+        myStrAppendInt(statusBuf, stepCounter);
+        myStrAppend(statusBuf, " / ");
+        myStrAppendInt(statusBuf, (1 << totalDisks) - 1);
+        myStrAppend(statusBuf, " | Speed: ");
+        myStrAppendInt(statusBuf, moveSpeedMs);
+        myStrAppend(statusBuf, "ms");
+        status.setString(statusBuf);
         status.setCharacterSize(18);
         status.setFillColor(sf::Color(220, 220, 220));
         status.setPosition(50.f, 55.f);
@@ -218,13 +274,18 @@ void animateMove(sf::RenderWindow &window, sf::Font &font, bool hasFont, Stack &
     if (!window.isOpen()) return;
 
     if (!dest.isEmpty() && src.peek() > dest.peek()) {
-        statusText = "[ERROR]: Illegal move! Larger disk cannot be placed on smaller disk.";
+        myStrCopy(statusText, "[ERROR]: Illegal move! Larger disk cannot be placed on smaller disk.");
         return;
     }
 
     int diskSize = src.pop();
     stepCounter++;
-    statusText = "Moved Disk [" + to_string(diskSize) + "] from Rod " + fromRod + " to Rod " + toRod;
+    myStrCopy(statusText, "Moved Disk [");
+    myStrAppendInt(statusText, diskSize);
+    myStrAppend(statusText, "] from Rod ");
+    myStrAppendChar(statusText, fromRod);
+    myStrAppend(statusText, " to Rod ");
+    myStrAppendChar(statusText, toRod);
 
     float diskWidth = 45.f + (diskSize * 24.f);
     float startX = ROD_X[srcIdx];
@@ -348,7 +409,9 @@ int main() {
                 if (!isSolving && (event.key.code == sf::Keyboard::Space || event.key.code == sf::Keyboard::Return)) {
                     isSolving = true;
                     solveHanoiSFML(window, font, hasFont, totalDisks, rodA, rodB, rodC, 0, 1, 2, 'A', 'B', 'C');
-                    statusText = "PUZZLE SOLVED IN " + to_string(stepCounter) + " MOVES! Press R to reset.";
+                    myStrCopy(statusText, "PUZZLE SOLVED IN ");
+                    myStrAppendInt(statusText, stepCounter);
+                    myStrAppend(statusText, " MOVES! Press R to reset.");
                     isSolving = false;
                 }
             }
