@@ -52,8 +52,8 @@ int totalDisks = 4;
 int stepCounter = 0;
 int moveSpeedMs = 300; // Animation speed in milliseconds
 bool isPaused = false;
-bool stepByStepMode = false;
-string statusText = "Press SPACE to start animation | UP/DOWN to change speed | R to reset";
+bool isSolving = false;
+string statusText = "Press SPACE to start | Keys 1-8 for disks | UP/DOWN for speed | R to reset";
 
 // Vibrant Color Palette for Disks
 sf::Color diskPalette[8] = {
@@ -73,8 +73,24 @@ float smoothstep(float edge0, float edge1, float x) {
     return t * t * (3.0f - 2.0f * t);
 }
 
+// Reset puzzle to initial state
+void resetPuzzle(int disks) {
+    totalDisks = disks;
+    stepCounter = 0;
+    isSolving = false;
+    isPaused = false;
+    rodA.clear();
+    rodB.clear();
+    rodC.clear();
+
+    for (int i = totalDisks; i >= 1; i--) {
+        rodA.push(i);
+    }
+    statusText = "Press SPACE to start | Keys 1-8 for disks | UP/DOWN for speed | R to reset";
+}
+
 // Function to render full SFML graphic scene
-void renderScene(sf::RenderWindow &window, sf::Font &font) {
+void renderScene(sf::RenderWindow &window, sf::Font &font, bool hasFont) {
     window.clear(sf::Color(24, 26, 36)); // Dark sleek background
 
     // 1. Draw Base Platform
@@ -91,14 +107,16 @@ void renderScene(sf::RenderWindow &window, sf::Font &font) {
         rod.setFillColor(sf::Color(170, 175, 190));
         window.draw(rod);
 
-        sf::Text label;
-        label.setFont(font);
-        label.setString(string("ROD ") + rodNames[i]);
-        label.setCharacterSize(22);
-        label.setStyle(sf::Text::Bold);
-        label.setFillColor(sf::Color(241, 196, 15));
-        label.setPosition(ROD_X[i] - 32.f, BASE_Y + 30.f);
-        window.draw(label);
+        if (hasFont) {
+            sf::Text label;
+            label.setFont(font);
+            label.setString(string("ROD ") + rodNames[i]);
+            label.setCharacterSize(22);
+            label.setStyle(sf::Text::Bold);
+            label.setFillColor(sf::Color(241, 196, 15));
+            label.setPosition(ROD_X[i] - 32.f, BASE_Y + 30.f);
+            window.draw(label);
+        }
     }
 
     // 3. Draw Disks on Stacks
@@ -118,45 +136,55 @@ void renderScene(sf::RenderWindow &window, sf::Font &font) {
                 window.draw(disk);
 
                 // Disk Number Text
-                sf::Text diskNum;
-                diskNum.setFont(font);
-                diskNum.setString(to_string(diskSize));
-                diskNum.setCharacterSize(14);
-                diskNum.setFillColor(sf::Color::White);
-                diskNum.setPosition(ROD_X[r] - 4.f, BASE_Y - ((level + 1) * DISK_HEIGHT) + 2.f);
-                window.draw(diskNum);
+                if (hasFont) {
+                    sf::Text diskNum;
+                    diskNum.setFont(font);
+                    diskNum.setString(to_string(diskSize));
+                    diskNum.setCharacterSize(14);
+                    diskNum.setFillColor(sf::Color::White);
+                    diskNum.setPosition(ROD_X[r] - 4.f, BASE_Y - ((level + 1) * DISK_HEIGHT) + 2.f);
+                    window.draw(diskNum);
+                }
             }
         }
     }
 
     // 4. Draw Header & Control HUD Text
-    sf::Text title;
-    title.setFont(font);
-    title.setString("TOWER OF HANOI - SFML 2D ENGINE");
-    title.setCharacterSize(24);
-    title.setStyle(sf::Text::Bold);
-    title.setFillColor(sf::Color::Cyan);
-    title.setPosition(300.f, 15.f);
-    window.draw(title);
+    if (hasFont) {
+        sf::Text title;
+        title.setFont(font);
+        title.setString("TOWER OF HANOI - SFML 2D ENGINE");
+        title.setCharacterSize(24);
+        title.setStyle(sf::Text::Bold);
+        title.setFillColor(sf::Color::Cyan);
+        title.setPosition(300.f, 15.f);
+        window.draw(title);
 
-    // Status Panel
-    sf::Text status;
-    status.setFont(font);
-    status.setString("Step: " + to_string(stepCounter) + " / " + to_string((1 << totalDisks) - 1) + 
-                     " | Speed: " + to_string(moveSpeedMs) + "ms | " + statusText);
-    status.setCharacterSize(17);
-    status.setFillColor(sf::Color(220, 220, 220));
-    status.setPosition(50.f, 55.f);
-    window.draw(status);
+        sf::Text status;
+        status.setFont(font);
+        status.setString("Disks: " + to_string(totalDisks) + " | Step: " + to_string(stepCounter) + 
+                         " / " + to_string((1 << totalDisks) - 1) + " | Speed: " + to_string(moveSpeedMs) + "ms");
+        status.setCharacterSize(18);
+        status.setFillColor(sf::Color(220, 220, 220));
+        status.setPosition(50.f, 55.f);
+        window.draw(status);
 
-    // Rule Legend Panel at Bottom
-    sf::Text legend;
-    legend.setFont(font);
-    legend.setString("Rules: 1. Only 1 disk moved at a time  |  2. Larger disk cannot go on smaller disk");
-    legend.setCharacterSize(15);
-    legend.setFillColor(sf::Color(160, 165, 180));
-    legend.setPosition(180.f, WINDOW_HEIGHT - 35.f);
-    window.draw(legend);
+        sf::Text msg;
+        msg.setFont(font);
+        msg.setString(statusText);
+        msg.setCharacterSize(15);
+        msg.setFillColor(sf::Color::Yellow);
+        msg.setPosition(50.f, 82.f);
+        window.draw(msg);
+
+        sf::Text legend;
+        legend.setFont(font);
+        legend.setString("Rules: 1. Only 1 disk moved at a time  |  2. Larger disk cannot go on smaller disk");
+        legend.setCharacterSize(15);
+        legend.setFillColor(sf::Color(160, 165, 180));
+        legend.setPosition(180.f, WINDOW_HEIGHT - 35.f);
+        window.draw(legend);
+    }
 
     window.display();
 }
@@ -178,16 +206,18 @@ void processEvents(sf::RenderWindow &window) {
             if (ev.key.code == sf::Keyboard::Down) {
                 if (moveSpeedMs < 1000) moveSpeedMs += 50;
             }
+            if (ev.key.code == sf::Keyboard::R) {
+                resetPuzzle(totalDisks);
+            }
         }
     }
 }
 
 // Smoothly animate disk moving from source rod to destination rod
-void animateMove(sf::RenderWindow &window, sf::Font &font, Stack &src, Stack &dest,
+void animateMove(sf::RenderWindow &window, sf::Font &font, bool hasFont, Stack &src, Stack &dest,
                  int srcIdx, int destIdx, char fromRod, char toRod) {
     if (!window.isOpen()) return;
 
-    // Rule Validation Check
     if (!dest.isEmpty() && src.peek() > dest.peek()) {
         statusText = "[ERROR]: Illegal move! Larger disk cannot be placed on smaller disk.";
         return;
@@ -224,7 +254,7 @@ void animateMove(sf::RenderWindow &window, sf::Font &font, Stack &src, Stack &de
         float currY = startY + (peakY - startY) * easeP;
 
         animatedDisk.setPosition(startX, currY);
-        renderScene(window, font);
+        renderScene(window, font, hasFont);
         window.draw(animatedDisk);
         window.display();
     }
@@ -240,7 +270,7 @@ void animateMove(sf::RenderWindow &window, sf::Font &font, Stack &src, Stack &de
         float currX = startX + (targetX - startX) * easeP;
 
         animatedDisk.setPosition(currX, peakY);
-        renderScene(window, font);
+        renderScene(window, font, hasFont);
         window.draw(animatedDisk);
         window.display();
     }
@@ -256,52 +286,52 @@ void animateMove(sf::RenderWindow &window, sf::Font &font, Stack &src, Stack &de
         float currY = peakY + (targetY - peakY) * easeP;
 
         animatedDisk.setPosition(targetX, currY);
-        renderScene(window, font);
+        renderScene(window, font, hasFont);
         window.draw(animatedDisk);
         window.display();
     }
 
     dest.push(diskSize);
-    renderScene(window, font);
+    renderScene(window, font, hasFont);
 }
 
 // Recursive Tower of Hanoi Engine
-void solveHanoiSFML(sf::RenderWindow &window, sf::Font &font, int n, 
+void solveHanoiSFML(sf::RenderWindow &window, sf::Font &font, bool hasFont, int n, 
                     Stack &src, Stack &aux, Stack &dest,
                     int sIdx, int aIdx, int dIdx,
                     char sName, char aName, char dName) {
     if (!window.isOpen()) return;
 
     if (n == 1) {
-        animateMove(window, font, src, dest, sIdx, dIdx, sName, dName);
+        animateMove(window, font, hasFont, src, dest, sIdx, dIdx, sName, dName);
         return;
     }
 
-    solveHanoiSFML(window, font, n - 1, src, dest, aux, sIdx, dIdx, aIdx, sName, dName, aName);
-    animateMove(window, font, src, dest, sIdx, dIdx, sName, dName);
-    solveHanoiSFML(window, font, n - 1, aux, src, dest, aIdx, sIdx, dIdx, aName, sName, dName);
+    solveHanoiSFML(window, font, hasFont, n - 1, src, dest, aux, sIdx, dIdx, aIdx, sName, dName, aName);
+    animateMove(window, font, hasFont, src, dest, sIdx, dIdx, sName, dName);
+    solveHanoiSFML(window, font, hasFont, n - 1, aux, src, dest, aIdx, sIdx, dIdx, aName, sName, dName);
 }
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Tower of Hanoi - SFML 2D Visualizer");
+    cout << "[DEBUG] SFML Visualizer starting..." << endl;
+
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Tower of Hanoi - SFML 2D Engine");
     window.setFramerateLimit(60);
 
+    cout << "[DEBUG] Window created successfully." << endl;
+
     sf::Font font;
-    if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
-        font.loadFromFile("C:/Windows/Fonts/calibri.ttf");
+    bool hasFont = font.loadFromFile("C:/Windows/Fonts/arial.ttf") || 
+                   font.loadFromFile("C:/Windows/Fonts/calibri.ttf") ||
+                   font.loadFromFile("C:/Windows/Fonts/segoeui.ttf");
+
+    if (hasFont) {
+        cout << "[DEBUG] System font loaded." << endl;
+    } else {
+        cout << "[WARNING] Could not load system font. Running in shape-only mode." << endl;
     }
 
-    cout << "Enter number of disks (1 to 8, default 4): ";
-    if (!(cin >> totalDisks) || totalDisks < 1 || totalDisks > 8) {
-        totalDisks = 4;
-    }
-
-    // Initialize Rod A with disks
-    for (int i = totalDisks; i >= 1; i--) {
-        rodA.push(i);
-    }
-
-    bool started = false;
+    resetPuzzle(4);
 
     while (window.isOpen()) {
         sf::Event event;
@@ -310,16 +340,29 @@ int main() {
                 window.close();
             }
             if (event.type == sf::Event::KeyPressed) {
-                if (!started && (event.key.code == sf::Keyboard::Space || event.key.code == sf::Keyboard::Return)) {
-                    started = true;
-                    solveHanoiSFML(window, font, totalDisks, rodA, rodB, rodC, 0, 1, 2, 'A', 'B', 'C');
-                    statusText = "PUZZLE SOLVED IN " + to_string(stepCounter) + " MOVES!";
+                if (event.key.code >= sf::Keyboard::Num1 && event.key.code <= sf::Keyboard::Num8) {
+                    int selectedDisks = event.key.code - sf::Keyboard::Num0;
+                    resetPuzzle(selectedDisks);
+                }
+                if (event.key.code >= sf::Keyboard::Numpad1 && event.key.code <= sf::Keyboard::Numpad8) {
+                    int selectedDisks = event.key.code - sf::Keyboard::Numpad0;
+                    resetPuzzle(selectedDisks);
+                }
+                if (event.key.code == sf::Keyboard::R) {
+                    resetPuzzle(totalDisks);
+                }
+                if (!isSolving && (event.key.code == sf::Keyboard::Space || event.key.code == sf::Keyboard::Return)) {
+                    isSolving = true;
+                    solveHanoiSFML(window, font, hasFont, totalDisks, rodA, rodB, rodC, 0, 1, 2, 'A', 'B', 'C');
+                    statusText = "PUZZLE SOLVED IN " + to_string(stepCounter) + " MOVES! Press R to reset.";
+                    isSolving = false;
                 }
             }
         }
 
-        renderScene(window, font);
+        renderScene(window, font, hasFont);
     }
 
+    cout << "[DEBUG] Window closed cleanly." << endl;
     return 0;
 }

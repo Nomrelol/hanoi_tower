@@ -52,9 +52,7 @@ Key requirements & constraints:
 ### Challenge 3: SFML Compiler Setup & Portable Builds
 * **The Problem**: SFML is a third-party library. Standard GCC compilers do not include `<SFML/Graphics.hpp>`. Copy-pasting SFML headers into `C:\MinGW\include\` often corrupts the compiler or causes 32-bit/64-bit architecture mismatches.
 * **Our Solution**:
-  Created **`03-cpp-sfml-graphics/`** with a portable local structure and an automated 1-click `build.bat` script:
-  - Place your downloaded GCC MinGW `SFML/` folder directly inside `03-cpp-sfml-graphics/` (`SFML/include`, `SFML/lib`, `SFML/bin`).
-  - Running `.\build.bat` automatically passes compiler flags (`-I SFML/include -L SFML/lib`) and outputs compiled binaries cleanly into `bin/`.
+  Created **`03-cpp-sfml-graphics/`** with a portable local structure and an automated 1-click `build.bat` script.
 
 ---
 
@@ -72,9 +70,6 @@ Key requirements & constraints:
 * **The Problem**: Trying to link MSVC-built SFML `.lib` files using MinGW GCC `g++` throws `undefined reference to __imp__...` errors.
 * **Why this happens (Engineering Principle)**:
   Unlike C or Java, C++ lacks a standardized Application Binary Interface (ABI) across compilers. GCC (`g++`) and Microsoft Visual C++ (`cl.exe`) use completely different function name mangling schemes, class memory layouts, and standard library implementations (`libstdc++` vs `MSVC STL`).
-* **Our Solution**:
-  - Educate team: Always download **MinGW GCC version** of SFML when compiling with MinGW `g++`.
-  - Alternatively use native GDI (`02-cpp-win32-gui`) which uses standard C Win32 API handles compatible with all C++ compilers.
 
 ---
 
@@ -83,8 +78,20 @@ Key requirements & constraints:
 * **Our Solution**:
   Implemented professional **Build Isolation**:
   - Every module compiles its executable into a dedicated `bin/` directory (e.g. `01-cpp-iostream/bin/hanoi-iostream.exe`).
-  - Source directories contain ONLY source files (`main.cpp`) and documentation (`EXPLANATION.md`).
   - `.gitignore` ignores `**/bin/` to keep source control repositories clean.
+
+---
+
+### Challenge 7: GCC Runtime Version Incompatibility (`Entry Point Not Found` Error) & Native Build Fix
+* **The Problem**: Running `hanoi-sfml.exe` triggered Windows popup: `Entry Point Not Found` in `sfml-system-2.dll`.
+* **Why this happened (Engineering Principle)**:
+  - The pre-compiled SFML zip downloaded online was built with an older **GCC 13 (MSVCRT)** compiler.
+  - Your system's compiler is **MinGW GCC 15.2 (UCRT)**.
+  - Between GCC 13 and GCC 15, the GCC runtime updated its C++ standard stream buffer function symbols (`basic_streambuf::seekpos`).
+* **The Permanent Resolution**:
+  We built SFML natively from source using your exact system compiler (`C:\MinGW\bin\g++.exe` & `cmake`).
+  - **Result**: Native GCC 15 `sfml-graphics-2.dll`, `sfml-window-2.dll`, and `sfml-system-2.dll` libraries were generated with 100% matching ABI signatures.
+  - Double-clicking `.\build.bat` now compiles and launches the SFML 2D visualizer window with 100% clean success!
 
 ---
 
@@ -113,8 +120,8 @@ cd ..\02-cpp-win32-gui
 g++ main.cpp -o bin/hanoi-win32-gui.exe -lgdi32 -mwindows
 .\bin\hanoi-win32-gui.exe
 
-# 3. SFML 2D Animation (Automated Build Script)
-cd ..\03-cpp-sfml_graphics
+# 3. SFML 2D Animation (Automated 1-Click Build Script)
+cd ..\03-cpp-sfml-graphics
 .\build.bat
 
 # 4. Windows Colored Console

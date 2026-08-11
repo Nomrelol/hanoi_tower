@@ -1,6 +1,6 @@
 # Tower of Hanoi - Polished SFML 2D Animation Defense Guide
 
-This guide provides a comprehensive breakdown of [main.cpp](file:///c:/Users/Dell/Desktop/proj/03_cpp_sfml_graphics/main.cpp) for your teacher viva.
+This guide provides a comprehensive breakdown of [main.cpp](file:///c:/Users/Dell/Desktop/proj/03-cpp-sfml-graphics/main.cpp) for your teacher viva.
 
 ---
 
@@ -34,9 +34,9 @@ $$\text{smoothstep}(t) = t^2 \times (3 - 2t)$$
 ## 3. How to Set Up & Compile with MinGW GCC
 
 Because SFML headers are external library files:
-1. Ensure your downloaded SFML folder (e.g. `SFML-2.6.1`) is inside `03_cpp_sfml_graphics/`.
+1. Ensure your downloaded GCC MinGW SFML folder (e.g. `SFML`) is inside `03-cpp-sfml-graphics/`.
 2. Double-click `build.bat` or run:
    ```powershell
    .\build.bat
    ```
-3. Run `.\hanoi.exe`!
+3. Run `.\bin\hanoi-sfml.exe`!

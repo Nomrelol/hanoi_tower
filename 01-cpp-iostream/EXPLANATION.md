@@ -1,11 +1,19 @@
 # Tower of Hanoi - Single Header (`<iostream>`) Teacher Guide
 
-This guide explains the simplified C++ implementation in [main.cpp](file:///c:/Users/Dell/Desktop/proj/01_cpp_iostream_only/main.cpp).
+This guide explains the simplified C++ implementation in [main.cpp](file:///c:/Users/Dell/Desktop/proj/01-cpp-iostream/main.cpp).
 
 > [!NOTE]
 > **Key Feature**: The code uses **ONLY `#include <iostream>`**.
 > - No `<windows.h>`, `<vector>`, `<stack>`, `<cstdlib>`, `<thread>`, or `<chrono>`.
 > - 100% pure standard C++ features that are super easy to explain in a teacher viva.
+
+---
+
+## How to Compile & Run
+```powershell
+g++ main.cpp -o bin/hanoi-iostream.exe
+.\bin\hanoi-iostream.exe
+```
 
 ---
 

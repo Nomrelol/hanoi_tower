@@ -1,10 +1,18 @@
 # Tower of Hanoi - Windows Color Version Defense Guide
 
-This guide explains the C++ Windows Color implementation in [main.cpp](file:///c:/Users/Dell/Desktop/proj/04_cpp_windows_color/main.cpp).
+This guide explains the C++ Windows Color implementation in [main.cpp](file:///c:/Users/Dell/Desktop/proj/04-cpp-windows-color/main.cpp).
 
 > [!NOTE]
 > **Key Feature**: Uses `<windows.h>` for vibrant console colors (`SetConsoleTextAttribute`) and precise timing (`Sleep()`).
 > - Custom `RodStack` struct (no STL containers used).
+
+---
+
+## How to Compile & Run
+```powershell
+g++ main.cpp -o bin/hanoi-win-color.exe
+.\bin\hanoi-win-color.exe
+```
 
 ---
 
