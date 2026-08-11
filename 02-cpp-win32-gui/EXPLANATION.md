@@ -1,26 +1,54 @@
-# Tower of Hanoi - Native Win32 GUI Guide (Zero Third-Party Downloads!)
+# 02-cpp-win32-gui — Native Windows GUI Visualizer
 
-This guide explains the Native Windows GUI implementation in [main.cpp](file:///c:/Users/Dell/Desktop/proj/02-cpp-win32-gui/main.cpp).
+**File**: [main.cpp](file:///c:/Users/Dell/Desktop/proj/02-cpp-win32-gui/main.cpp)
 
 > [!NOTE]
-> **Key Feature**:
-> - Creates a real graphical Windows Desktop GUI window **without downloading SFML or any 3rd-party library**.
-> - Uses native Windows GDI API (`<windows.h>` + `g++ main.cpp -o bin/hanoi-win32-gui.exe -lgdi32 -mwindows`).
-> - Uses a custom `struct RodStack` array stack (no STL containers) to meet teacher rules!
+> Uses **native Windows GDI** (`<windows.h>` only). Zero third-party downloads.  
+> Compiles with `-lgdi32 -mwindows` — standard flags on every Windows MinGW install.
 
 ---
 
-## How to Compile & Run
+## Compile & Run
 ```powershell
+cd 02-cpp-win32-gui
 g++ main.cpp -o bin/hanoi-win32-gui.exe -lgdi32 -mwindows
 .\bin\hanoi-win32-gui.exe
 ```
-- `-lgdi32`: Links native Windows Graphics API built into every Windows machine.
-- `-mwindows`: Hides command prompt background window.
+*A console prompt asks for disk count first, then the GUI window opens.*
 
 ---
 
-## Code Breakdown for Oral Defense
-- **Double-Buffering (`BitBlt`)**: Renders scenes onto an off-screen memory bitmap buffer first, then copies it to the display window to eliminate window flicker.
-- **`RodStack`**: Custom array stack (`disks[8]`) with `push`, `pop`, `peek`, and `getDiskAt` methods.
-- **`WinMain`**: Standard entry point for Windows GUI applications.
+## What the code does
+
+1. **`struct Tower`** — array-based stack with `d[8]` and `top`. Same concept as `Rod` in `01-cpp-iostream` but with different field names (intentionally independent).
+
+2. **`paint(HDC)`** — draws the full scene into a memory bitmap first (`CreateCompatibleDC`, `CreateCompatibleBitmap`) then copies it to screen in one `BitBlt` call — this removes flicker.
+
+3. **`WndProc`** — Windows callback handling:
+   - `WM_PAINT` → call `paint()`
+   - `VK_SPACE` → start animation
+   - `VK_UP` / `VK_DOWN` → adjust animation speed (+/- 100ms)
+
+4. **`solve(hwnd, k, ...)`** — same recursive algorithm, but each `moveDisk` call redraws the window and calls `Sleep(delayMs)`.
+
+5. **Input** — disk count is read via `cout/cin` in a temporary console (`AllocConsole`) before the window opens.
+
+---
+
+## Runtime Controls
+| Key | Action |
+|---|---|
+| `SPACE` | Start animation |
+| `↑` (Up arrow) | Speed up (−100ms) |
+| `↓` (Down arrow) | Slow down (+100ms) |
+
+---
+
+## Teacher Viva Q&A
+
+| Question | Answer |
+|---|---|
+| What is `WinMain`? | Windows entry point instead of `main()` when using `-mwindows` |
+| What is double-buffering? | Drawing to an off-screen bitmap then copying avoids flicker |
+| Why `TRANSPARENT` background mode? | So text drawn over coloured rectangles shows correctly |
+| Why `-lgdi32`? | Links the GDI (Graphics Device Interface) system library for drawing |

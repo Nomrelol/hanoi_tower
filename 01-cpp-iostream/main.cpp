@@ -1,148 +1,113 @@
 #include <iostream>
-
 using namespace std;
 
 const int MAX = 10;
 
-// Custom Stack Structure (No STL library container used)
-struct Stack {
-    int arr[MAX];
+// Simple rod structure using an array as a stack
+struct Rod {
+    int disk[MAX];
     int top = -1;
 
-    void push(int disk) { 
-        arr[++top] = disk; 
-    }
-    
-    int pop() { 
-        if (top == -1) return 0;
-        return arr[top--]; 
-    }
-    
-    int peek() { 
-        if (top == -1) return 0;
-        return arr[top]; 
-    }
-    
-    bool isEmpty() { 
-        return top == -1; 
-    }
-    
-    int getAt(int level) { 
-        if (level <= top) return arr[level];
-        return 0;
-    }
+    void push(int d)     { disk[++top] = d; }
+    int  pop()           { return (top == -1) ? 0 : disk[top--]; }
+    int  peek()          { return (top == -1) ? 0 : disk[top]; }
+    bool isEmpty()       { return top == -1; }
+    int  diskAt(int lvl) { return (lvl <= top) ? disk[lvl] : 0; }
 };
 
-Stack rodA, rodB, rodC;
-int totalDisks = 3;
+Rod A, B, C;
+int n;          // number of disks
 int moves = 0;
+int delayLoop;  // spin-loop iterations for delay
 
-// Simple delay function using empty loop (no external header needed)
-void delay() {
-    for (volatile long long i = 0; i < 150000000; i++) {
-        // Simple loop delay
-    }
+void wait() {
+    for (volatile long long i = 0; i < delayLoop; i++);
 }
 
-// Function to print repeated spaces
-void printSpaces(int count) {
-    for (int i = 0; i < count; i++) cout << " ";
+void printBar(int count, char ch) {
+    for (int i = 0; i < count; i++) cout << ch;
 }
 
-// Function to print repeated equals signs
-void printEquals(int count) {
-    for (int i = 0; i < count; i++) cout << "=";
-}
+void draw(int movedDisk = 0, char from = ' ', char to = ' ') {
+    for (int i = 0; i < 35; i++) cout << '\n';
 
-// Function to draw rods & disks graphically in the console
-void draw(int disk = 0, char from = ' ', char to = ' ') {
-    // Clear screen by printing newlines (pure iostream)
-    for (int i = 0; i < 30; i++) cout << "\n";
+    if (moves == 0)
+        cout << "  === TOWER OF HANOI | Initial State ===\n\n";
+    else
+        cout << "  Step " << moves << ": Disk [" << movedDisk
+             << "] moved " << from << " -> " << to << "\n\n";
 
-    if (moves == 0) {
-        cout << "=== TOWER OF HANOI (Initial State) ===\n\n";
-    } else {
-        cout << "Step " << moves << ": Moved Disk [" << disk << "] from Rod " << from << " to Rod " << to << "\n\n";
-    }
-
-    // Draw from top level down to level 0
-    for (int level = totalDisks - 1; level >= 0; level--) {
-        Stack* rods[3] = { &rodA, &rodB, &rodC };
-        
+    for (int lvl = n - 1; lvl >= 0; lvl--) {
+        Rod* rods[3] = { &A, &B, &C };
         for (int r = 0; r < 3; r++) {
-            int d = rods[r]->getAt(level);
+            int d = rods[r]->diskAt(lvl);
             if (d > 0) {
-                // Draw Disk
-                printSpaces(totalDisks - d);
-                cout << "[";
-                printEquals(d);
+                printBar(n - d, ' ');
+                cout << '[';
+                printBar(d, '=');
                 cout << d;
-                printEquals(d);
-                cout << "]";
-                printSpaces(totalDisks - d);
+                printBar(d, '=');
+                cout << ']';
+                printBar(n - d, ' ');
             } else {
-                // Draw empty rod line
-                printSpaces(totalDisks);
+                printBar(n, ' ');
                 cout << " | ";
-                printSpaces(totalDisks);
+                printBar(n, ' ');
             }
             cout << "   ";
         }
-        cout << "\n";
+        cout << '\n';
     }
 
-    // Draw Bases & Labels
-    int baseLen = totalDisks * 2 + 3;
-    for (int i = 0; i < 3; i++) {
-        printEquals(baseLen);
-        cout << "   ";
-    }
-    cout << "\n";
+    int base = n * 2 + 3;
+    for (int i = 0; i < 3; i++) { printBar(base, '='); cout << "   "; }
+    cout << '\n';
 
-    printSpaces(totalDisks); cout << "ROD A"; printSpaces(totalDisks + 2);
-    printSpaces(totalDisks); cout << "ROD B"; printSpaces(totalDisks + 2);
-    printSpaces(totalDisks); cout << "ROD C"; cout << "\n\n";
+    printBar(n, ' '); cout << "ROD A";
+    printBar(n + 2, ' ');
+    printBar(n, ' '); cout << "ROD B";
+    printBar(n + 2, ' ');
+    printBar(n, ' '); cout << "ROD C\n\n";
 
-    delay(); // Pause execution between steps
+    wait();
 }
 
-// Move disk between stacks
-void moveDisk(Stack &src, Stack &dest, char sName, char dName) {
-    int d = src.pop();
-    dest.push(d);
+void move(Rod &src, Rod &dst, char s, char d) {
+    int disk = src.pop();
+    dst.push(disk);
     moves++;
-    draw(d, sName, dName);
+    draw(disk, s, d);
 }
 
-// Recursive Solution
-void solve(int n, Stack &src, Stack &aux, Stack &dest, char s, char a, char d) {
-    if (n == 1) {
-        moveDisk(src, dest, s, d);
-        return;
-    }
-    solve(n - 1, src, dest, aux, s, d, a);
-    moveDisk(src, dest, s, d);
-    solve(n - 1, aux, src, dest, a, s, d);
+void solve(int k, Rod &src, Rod &aux, Rod &dst, char s, char a, char d) {
+    if (k == 1) { move(src, dst, s, d); return; }
+    solve(k - 1, src, dst, aux, s, d, a);
+    move(src, dst, s, d);
+    solve(k - 1, aux, src, dst, a, s, d);
 }
 
 int main() {
     cout << "Enter number of disks (1-8): ";
-    cin >> totalDisks;
-    if (totalDisks < 1 || totalDisks > 8) totalDisks = 3;
+    cin >> n;
+    if (n < 1 || n > 8) n = 3;
 
-    // Load Rod A with disks
-    for (int i = totalDisks; i >= 1; i--) rodA.push(i);
+    cout << "Speed — 1=fast  2=medium  3=slow: ";
+    int speed; cin >> speed;
+    if      (speed == 1) delayLoop = 30000000LL;
+    else if (speed == 3) delayLoop = 300000000LL;
+    else                 delayLoop = 120000000LL;
 
-    draw(); // Initial display
-    
-    cout << "Press ENTER to start recursion...";
-    cin.ignore();
-    cin.get();
+    for (int i = n; i >= 1; i--) A.push(i);
 
-    solve(totalDisks, rodA, rodB, rodC, 'A', 'B', 'C');
+    draw();
 
-    cout << "\n=====================================\n";
-    cout << "  SOLVED SUCCESSFULLY IN " << moves << " MOVES!\n";
+    cout << "Press ENTER to start...";
+    cin.ignore(); cin.get();
+
+    solve(n, A, B, C, 'A', 'B', 'C');
+
+    cout << "=====================================\n";
+    cout << "  SOLVED IN " << moves << " MOVES!\n";
     cout << "=====================================\n";
     return 0;
 }

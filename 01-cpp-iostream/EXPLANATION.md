@@ -1,79 +1,57 @@
-# Tower of Hanoi - Single Header (`<iostream>`) Teacher Guide
+# 01-cpp-iostream — Pure C++ Console Visualizer
 
-This guide explains the simplified C++ implementation in [main.cpp](file:///c:/Users/Dell/Desktop/proj/01-cpp-iostream/main.cpp).
+**File**: [main.cpp](file:///c:/Users/Dell/Desktop/proj/01-cpp-iostream/main.cpp)
 
 > [!NOTE]
-> **Key Feature**: The code uses **ONLY `#include <iostream>`**.
-> - No `<windows.h>`, `<vector>`, `<stack>`, `<cstdlib>`, `<thread>`, or `<chrono>`.
-> - 100% pure standard C++ features that are super easy to explain in a teacher viva.
+> **Only `#include <iostream>`** — zero other headers. No `<windows.h>`, no `<vector>`, no `<stack>`.  
+> This is the teacher-safe version: trivial to compile anywhere, trivial to explain line by line.
 
 ---
 
-## How to Compile & Run
+## Compile & Run
 ```powershell
+cd 01-cpp-iostream
 g++ main.cpp -o bin/hanoi-iostream.exe
 .\bin\hanoi-iostream.exe
 ```
 
 ---
 
-## Line-by-Line Code Breakdown
+## What the code does
 
-### 1. Custom Stack (`struct Stack`)
-```cpp
-struct Stack {
-    int arr[10];   // Holds disk sizes (1 to 8)
-    int top = -1;  // Index of the top disk (-1 when empty)
+1. **`struct Rod`** — a hand-built stack using `int d[10]` and `top = -1`.  
+   - `push`, `pop`, `peek`, `diskAt` — four simple functions, each one line.  
+   - No `std::stack`, no `std::vector`.
 
-    void push(int disk) { arr[++top] = disk; }
-    int pop() { return (top == -1) ? 0 : arr[top--]; }
-    int peek() { return (top == -1) ? 0 : arr[top]; }
-    bool isEmpty() { return top == -1; }
-    int getAt(int level) { return (level <= top) ? arr[level] : 0; }
-};
-```
-* **`arr[10]`**: Fixed array storing disk diameters.
-* **`top = -1`**: Track top element index. `push()` increments `top`, `pop()` decrements `top`.
-* **`getAt(level)`**: Allows drawing the tower level by level without modifying the stack.
+2. **`draw()`** — clears the screen by printing 35 blank lines (pure `cout`).  
+   Loops from level 0 to level n, printing each rod's disk as `[===3===]` or a `|` for empty.
+
+3. **`solve(n, src, aux, dst)`** — the classic three-line recursion:
+   ```
+   if n == 1 → move directly
+   else → move n-1 to aux, move largest, move n-1 from aux to dst
+   ```
+
+4. **`wait()`** — a spin loop (`volatile long long`) for delay. Chosen by user at startup (fast / medium / slow).
 
 ---
 
-### 2. Pure `<iostream>` Delay Loop (`delay`)
-```cpp
-void delay() {
-    for (volatile long long i = 0; i < 150000000; i++) {
-        // Simple empty loop to create delay between frames
-    }
-}
+## What the user sees at runtime
 ```
-* **Teacher Explanation**: *"Instead of using external headers like `<windows.h>` or `<thread>`, we use a simple loop `delay()` that executes 150 million iterations to pause execution for roughly half a second between steps."*
+Enter number of disks (1-8): 3
+Speed — 1=fast  2=medium  3=slow: 2
+Press ENTER to start...
+[display updates step by step]
+SOLVED IN 7 MOVES!
+```
 
 ---
 
-### 3. Screen Clearing & Display (`draw`)
-```cpp
-void draw(int disk = 0, char from = ' ', char to = ' ') {
-    for (int i = 0; i < 30; i++) cout << "\n";
-    ...
-```
-* **Teacher Explanation**: *"To clear the console screen using pure `<iostream>`, we print 30 newlines. Then we loop from the top height level down to level 0. For each rod, if a disk exists at that level (`d > 0`), we print `[= d =]`. Otherwise, we print the rod axis `|`."*
+## Teacher Viva Q&A
 
----
-
-### 4. Recursive Solution (`solve`)
-```cpp
-void solve(int n, Stack &src, Stack &aux, Stack &dest, char s, char a, char d) {
-    if (n == 1) {
-        moveDisk(src, dest, s, d);
-        return;
-    }
-    solve(n - 1, src, dest, aux, s, d, a);
-    moveDisk(src, dest, s, d);
-    solve(n - 1, aux, src, dest, a, s, d);
-}
-```
-* **Base case (`n == 1`)**: Move single disk directly from source rod to destination rod.
-* **Recursive step**:
-  1. Move `n - 1` disks from `src` to `aux`.
-  2. Move bottom disk from `src` to `dest`.
-  3. Move `n - 1` disks from `aux` to `dest`.
+| Question | Answer |
+|---|---|
+| Why `volatile` in the delay loop? | Prevents the compiler from optimising the empty loop away |
+| Why not use `Sleep()`? | `Sleep()` needs `<windows.h>` — this version is header-free |
+| Why `diskAt(lvl)` instead of `peek()`? | `peek` only reads the top; `diskAt` reads any level for drawing |
+| What is the minimum moves formula? | 2ⁿ − 1 (7 for n=3, 255 for n=8) |

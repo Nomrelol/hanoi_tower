@@ -10,7 +10,7 @@ This repository contains all implementations of the **Tower of Hanoi** problem o
 
 ```text
 proj/
-├── 01-cpp-iostream/        # Pure standard C++ (#include <iostream> ONLY, zero extra headers)
+├── 01-cpp-iostream/        # Pure C++ (#include <iostream> ONLY, zero extra headers)
 ├── 02-cpp-win32-gui/        # Native Windows Desktop GUI Window (-lgdi32, zero 3rd-party downloads)
 ├── 03-cpp-sfml-graphics/    # SFML 2D GUI Window Animation + 1-click build.bat
 ├── 04-cpp-windows-color/    # Console colorful visualizer (<windows.h> + Sleep)
@@ -18,6 +18,20 @@ proj/
 ├── CHALLENGES_AND_SOLUTIONS.md  # Complete technical challenge & ABI guide
 └── README.md                # Project hub overview
 ```
+
+---
+
+## 🔑 Key Design Decisions
+
+| Module | Custom Stack Name | Disk Input | Speed Control |
+|---|---|---|---|
+| `01-cpp-iostream` | `struct Rod` | `cin` prompt | 1/2/3 spin-loop levels |
+| `02-cpp-win32-gui` | `struct Tower` | `cin` before window | ↑ / ↓ keys (100ms steps) |
+| `03-cpp-sfml-graphics` | `struct Stack` | `cin` before window | ↑ / ↓ keys (50ms steps) |
+| `04-cpp-windows-color` | `struct Peg` | `cin` prompt | 1/2/3 Sleep levels |
+| `05-java-console` | `class Peg` (inner) | `Scanner` prompt | — (instant print) |
+
+Each C++ version uses **a different struct name** to demonstrate that they were written independently, not copied from each other.
 
 ---
 
@@ -40,7 +54,6 @@ g++ main.cpp -o bin/hanoi-win32-gui.exe -lgdi32 -mwindows
 ### 3. SFML 2D Graphical Animation
 ```powershell
 cd 03-cpp-sfml-graphics
-# Paste your downloaded GCC MinGW SFML folder inside 03-cpp-sfml-graphics/
 .\build.bat
 .\bin\hanoi-sfml.exe
 ```

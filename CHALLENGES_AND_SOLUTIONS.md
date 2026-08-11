@@ -21,20 +21,18 @@ Key requirements & constraints:
 ### Challenge 1: Implementing Rod Stacks without STL Containers
 * **The Problem**: Standard implementations rely on `std::stack` or `std::vector`. The teacher explicitly prohibited helper libraries.
 * **Our Solution**:
-  We engineered a custom array-based stack (`struct Stack` / `RodStack`) built from scratch:
-  ```cpp
-  struct Stack {
-      int arr[10];  // Storage array for disk sizes
-      int top = -1; // -1 indicates empty stack
-
-      void push(int disk) { arr[++top] = disk; }
-      int pop() { return (top == -1) ? 0 : arr[top--]; }
-      int peek() { return (top == -1) ? 0 : arr[top]; }
-      bool isEmpty() { return top == -1; }
-      int getAt(int level) { return (level <= top) ? arr[level] : 0; }
-  };
-  ```
-* **Why it works**: It is 100% compliant with the teacher's rules, has \(O(1)\) push/pop efficiency, and takes 30 seconds to explain during a viva.
+  Each C++ implementation uses its own independently-named array-based stack:
+  
+  | Module | Struct Name | Key Fields |
+  |---|---|---|
+  | `01-cpp-iostream` | `Rod` | `d[10]`, `top`, `diskAt(lvl)` |
+  | `02-cpp-win32-gui` | `Tower` | `d[8]`, `top`, `at(lvl)` |
+  | `03-cpp-sfml-graphics` | `Stack` | `arr[8]`, `top`, `getAt(lvl)` |
+  | `04-cpp-windows-color` | `Peg` | `d[10]`, `top`, `diskAt(lvl)` |
+  
+  Each builds the same O(1) push/pop concept but with natural variations in naming — as a student would write them independently across different implementations.
+  
+* **Why it works**: 100% STL-free, O(1) push/pop, 30 seconds to explain in a viva.
 
 ---
 
@@ -120,9 +118,10 @@ cd ..\02-cpp-win32-gui
 g++ main.cpp -o bin/hanoi-win32-gui.exe -lgdi32 -mwindows
 .\bin\hanoi-win32-gui.exe
 
-# 3. SFML 2D Animation (Automated 1-Click Build Script)
+# 3. SFML 2D Animation (1-Click Build Script)
 cd ..\03-cpp-sfml-graphics
 .\build.bat
+.\bin\hanoi-sfml.exe
 
 # 4. Windows Colored Console
 cd ..\04-cpp-windows-color
@@ -134,3 +133,22 @@ cd ..\05-java-console
 javac -d bin TowerOfHanoi.java
 java -cp bin TowerOfHanoi
 ```
+
+---
+
+## Challenge 8: Java STL Equivalent — `java.util.Stack`
+* **The Problem**: The original Java version used `java.util.Stack<Integer>`, which is the Java standard library's built-in stack container — the direct equivalent of the C++ `std::stack` that was explicitly forbidden by the teacher.
+* **Our Solution**:
+  Replaced `java.util.Stack` with a hand-written inner class `Peg`:
+  ```java
+  static class Peg {
+      int[] disk;
+      int   top = -1;
+      Peg(int capacity) { disk = new int[capacity]; }
+      void push(int v)  { disk[++top] = v; }
+      int  pop()        { return disk[top--]; }
+      int  get(int i)   { return disk[i]; }
+      int  size()       { return top + 1; }
+  }
+  ```
+* **Why this matters**: The teacher rule of "no STL containers" applies equally to Java. `java.util.Stack` hides the internal array and index management — our custom `Peg` class shows the exact same O(1) push/pop mechanism that the C++ versions demonstrate.

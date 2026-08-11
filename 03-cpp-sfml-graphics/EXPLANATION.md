@@ -1,42 +1,62 @@
-# Tower of Hanoi - Polished SFML 2D Animation Defense Guide
+# 03-cpp-sfml-graphics — SFML 2D Animated Visualizer
 
-This guide provides a comprehensive breakdown of [main.cpp](file:///c:/Users/Dell/Desktop/proj/03-cpp-sfml-graphics/main.cpp) for your teacher viva.
+**File**: [main.cpp](file:///c:/Users/Dell/Desktop/proj/03-cpp-sfml-graphics/main.cpp)
 
----
-
-## 1. Teacher Requirement Compliance
-
-* **No STL Containers (`<vector>`, `<stack>`)**:
-  Implemented custom `struct Stack` storing disk values in an array `arr[8]` with a `top` integer index.
-* **Rule Enforcement**:
-  `animateMove()` verifies `src.peek() > dest.peek()`. If a move violates the rule, an error alert is rendered on screen.
-* **Zero AI Boilerplate**:
-  Written with standard, readable C++ procedural logic and clear variable names.
+> [!NOTE]
+> Requires the SFML GCC MinGW build already placed in `03-cpp-sfml-graphics/SFML/`.  
+> Run `build.bat` — it compiles and copies the needed DLLs automatically.
 
 ---
 
-## 2. Key Animation & Engineering Features
-
-### A. Physics-Based Smoothstep Motion (`smoothstep`)
-Instead of jerky linear motion, disk movements use a quadratic S-curve interpolation formula (`smoothstep`):
-$$\text{smoothstep}(t) = t^2 \times (3 - 2t)$$
-- **Phase 1 (Lift)**: Disk smoothly accelerates upwards from the source rod stack.
-- **Phase 2 (Slide)**: Disk slides horizontally to the target rod coordinate (`ROD_X[destIdx]`).
-- **Phase 3 (Drop)**: Disk gently descends down onto the target rod stack.
-
-### B. Dynamic HUD & Control Panel
-- **Real-time Step Progress**: Displays `Step X / (2^N - 1)`.
-- **Interactive Speed Control**: Press **UP Arrow** or **DOWN Arrow** to adjust animation delay speed (50ms to 1000ms).
-- **Pause / Resume**: Press **SPACEBAR** at any time during animation.
+## Compile & Run
+```powershell
+cd 03-cpp-sfml-graphics
+.\build.bat
+.\bin\hanoi-sfml.exe
+```
+*Console asks for disk count first, then the animated window opens.*
 
 ---
 
-## 3. How to Set Up & Compile with MinGW GCC
+## What the code does
 
-Because SFML headers are external library files:
-1. Ensure your downloaded GCC MinGW SFML folder (e.g. `SFML`) is inside `03-cpp-sfml-graphics/`.
-2. Double-click `build.bat` or run:
-   ```powershell
-   .\build.bat
-   ```
-3. Run `.\bin\hanoi-sfml.exe`!
+1. **`struct Stack`** — custom array stack (same idea as `Rod`/`Tower`/`Peg` in other versions, independently written for SFML context).
+
+2. **`renderScene(window, font)`** — draws background, base platform, three rods, all disks as coloured rectangles using `sf::RectangleShape`, plus HUD text.
+
+3. **`animateMove(...)`** — three-phase smooth animation per disk move:
+   - Phase 1: Lift disk straight up
+   - Phase 2: Slide horizontally to target rod
+   - Phase 3: Drop disk down onto stack
+   Each phase uses a `smoothstep` easing curve for realistic motion.
+
+4. **`solveHanoiSFML(window, n, ...)`** — recursive solver that calls `animateMove` instead of an instant move.
+
+5. **Keyboard controls** (while window is open):
+   - `1`–`8` → change disk count and reset
+   - `SPACE` / `ENTER` → start solving
+   - `↑` / `↓` → adjust animation speed
+   - `R` → reset puzzle
+
+---
+
+## Runtime Controls
+| Key | Action |
+|---|---|
+| `1`–`8` | Select number of disks |
+| `SPACE` or `ENTER` | Start solving |
+| `↑` | Speed up (−50ms) |
+| `↓` | Slow down (+50ms) |
+| `R` | Reset puzzle |
+
+---
+
+## Teacher Viva Q&A
+
+| Question | Answer |
+|---|---|
+| What is SFML? | Simple and Fast Multimedia Library — a C++ library for 2D graphics |
+| Why `smoothstep`? | Gives ease-in/ease-out motion instead of robotic constant speed |
+| What does `setOrigin` do? | Sets the reference point of the shape so it centres properly on the rod |
+| Why a `build.bat`? | SFML needs `-I` include path and `-L` lib path — the script handles it automatically |
+| Why GCC MinGW SFML specifically? | SFML `.a` libs must match the compiler ABI; MSVC `.lib` files don't work with `g++` |

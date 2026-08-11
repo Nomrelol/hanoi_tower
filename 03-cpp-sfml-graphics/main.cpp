@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <cmath>
 #include <string>
 
 using namespace std;
@@ -313,25 +312,20 @@ void solveHanoiSFML(sf::RenderWindow &window, sf::Font &font, bool hasFont, int 
 }
 
 int main() {
-    cout << "[DEBUG] SFML Visualizer starting..." << endl;
+    int startDisks = 4;
+    cout << "Enter number of disks (1-8): ";
+    cin  >> startDisks;
+    if (startDisks < 1 || startDisks > 8) startDisks = 4;
 
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Tower of Hanoi - SFML 2D Engine");
     window.setFramerateLimit(60);
 
-    cout << "[DEBUG] Window created successfully." << endl;
-
     sf::Font font;
-    bool hasFont = font.loadFromFile("C:/Windows/Fonts/arial.ttf") || 
+    bool hasFont = font.loadFromFile("C:/Windows/Fonts/arial.ttf") ||
                    font.loadFromFile("C:/Windows/Fonts/calibri.ttf") ||
                    font.loadFromFile("C:/Windows/Fonts/segoeui.ttf");
 
-    if (hasFont) {
-        cout << "[DEBUG] System font loaded." << endl;
-    } else {
-        cout << "[WARNING] Could not load system font. Running in shape-only mode." << endl;
-    }
-
-    resetPuzzle(4);
+    resetPuzzle(startDisks);
 
     while (window.isOpen()) {
         sf::Event event;
@@ -363,6 +357,5 @@ int main() {
         renderScene(window, font, hasFont);
     }
 
-    cout << "[DEBUG] Window closed cleanly." << endl;
     return 0;
 }

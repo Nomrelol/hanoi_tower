@@ -1,70 +1,86 @@
 import java.util.Scanner;
-import java.util.Stack;
 
 public class TowerOfHanoi {
-    static Stack<Integer> left = new Stack<>();
-    static Stack<Integer> middle = new Stack<>();
-    static Stack<Integer> right = new Stack<>();
-    static int total;
 
-    public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        System.out.print("Enter number of disks: ");
-        total = input.nextInt();
-        for (int i = total; i >= 1; i--) {
-            left.push(i);
-        }
-        System.out.println("\nInitial Position:\n");
-        show();
-        move(total, left, right, middle, "A", "C", "B");
-        input.close();
+    // Custom array-based stack — no java.util.Stack used
+    static class Peg {
+        int[] disk;
+        int   top = -1;
+
+        Peg(int capacity) { disk = new int[capacity]; }
+
+        void push(int v)     { disk[++top] = v; }
+        int  pop()           { return disk[top--]; }
+        int  get(int i)      { return disk[i]; }
+        int  size()          { return top + 1; }
+        boolean isEmpty()    { return top == -1; }
     }
 
-    static void move(int disk, Stack<Integer> from, Stack<Integer> to,
-                     Stack<Integer> helper, String start, String end, String extra) {
-        if (disk == 1) {
+    static int   n;
+    static Peg   left, middle, right;
+    static int   moves = 0;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of disks (1-8): ");
+        n = sc.nextInt();
+        if (n < 1 || n > 8) n = 3;
+
+        left   = new Peg(n);
+        middle = new Peg(n);
+        right  = new Peg(n);
+
+        for (int i = n; i >= 1; i--) left.push(i);
+
+        System.out.println("\nInitial State:\n");
+        show();
+
+        move(n, left, right, middle, "A", "C", "B");
+
+        System.out.println("Solved in " + moves + " moves!");
+        sc.close();
+    }
+
+    static void move(int k, Peg from, Peg to, Peg helper,
+                     String nameFrom, String nameTo, String nameHelper) {
+        if (k == 1) {
             to.push(from.pop());
-            System.out.println("Move Disk 1 from " + start + " to " + end + "\n");
+            moves++;
+            System.out.println("Move disk 1: " + nameFrom + " -> " + nameTo + "\n");
             show();
             return;
         }
-        move(disk - 1, from, helper, to, start, extra, end);
+        move(k - 1, from, helper, to, nameFrom, nameHelper, nameTo);
         to.push(from.pop());
-        System.out.println("Move Disk " + disk + " from " + start + " to " + end + "\n");
+        moves++;
+        System.out.println("Move disk " + k + ": " + nameFrom + " -> " + nameTo + "\n");
         show();
-        move(disk - 1, helper, to, from, extra, end, start);
+        move(k - 1, helper, to, from, nameHelper, nameTo, nameFrom);
     }
 
     static void show() {
-        for (int level = total; level >= 1; level--) {
-            printRod(left, level);
-            printRod(middle, level);
-            printRod(right, level);
+        for (int lvl = n; lvl >= 1; lvl--) {
+            printLevel(left,   lvl);
+            printLevel(middle, lvl);
+            printLevel(right,  lvl);
             System.out.println();
         }
-        for (int i = 0; i < total * 8 + 5; i++) {
-            System.out.print("-");
-        }
+        for (int i = 0; i < n * 8 + 5; i++) System.out.print('-');
         System.out.println();
-        System.out.printf("%" + total + "sA%" + (total + 7) + "sB%" + (total + 7) + "sC\n\n", "", "", "");
+        System.out.printf("%" + n + "sA%" + (n + 7) + "sB%" + (n + 7) + "sC%n%n", "", "", "");
     }
 
-    static void printRod(Stack<Integer> rod, int level) {
-        if (rod.size() >= level) {
-            int disk = rod.get(level - 1);
-            int spaces = total - disk;
-            for (int i = 0; i < spaces; i++)
-                System.out.print(" ");
-            for (int i = 0; i < disk * 2 - 1; i++)
-                System.out.print("*");
-            for (int i = 0; i < spaces; i++)
-                System.out.print(" ");
+    static void printLevel(Peg rod, int lvl) {
+        if (rod.size() >= lvl) {
+            int d = rod.get(lvl - 1);
+            int spaces = n - d;
+            for (int i = 0; i < spaces; i++) System.out.print(' ');
+            for (int i = 0; i < d * 2 - 1; i++) System.out.print('*');
+            for (int i = 0; i < spaces; i++) System.out.print(' ');
         } else {
-            for (int i = 0; i < total - 1; i++)
-                System.out.print(" ");
-            System.out.print("|");
-            for (int i = 0; i < total - 1; i++)
-                System.out.print(" ");
+            for (int i = 0; i < n - 1; i++) System.out.print(' ');
+            System.out.print('|');
+            for (int i = 0; i < n - 1; i++) System.out.print(' ');
         }
         System.out.print("    ");
     }
