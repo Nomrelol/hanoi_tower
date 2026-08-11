@@ -3,7 +3,7 @@ using namespace std;
 
 const int MAX = 10;
 
-// Simple rod structure using an array as a stack
+// Stack implementation for disk tower
 struct Rod {
     int disk[MAX];
     int top = -1;
@@ -16,9 +16,9 @@ struct Rod {
 };
 
 Rod A, B, C;
-int n;          // number of disks
+int n;          // Number of disks
 int moves = 0;
-int delayLoop;  // spin-loop iterations for delay
+int delayLoop;  // Delay loop counter
 
 void wait() {
     for (volatile long long i = 0; i < delayLoop; i++);
