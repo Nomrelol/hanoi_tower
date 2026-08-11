@@ -26,7 +26,7 @@ proj/
 | Module | Custom Stack Name | Disk Input | Speed Control |
 |---|---|---|---|
 | `01-cpp-iostream` | `struct Rod` | `cin` prompt | 1/2/3 spin-loop levels |
-| `02-cpp-win32-gui` | `struct Tower` | `cin` before window | ↑ / ↓ keys (100ms steps) |
+| `02-cpp-win32-gui` | `struct Tower` | Keys 1–8 in window | ↑ / ↓ keys (100ms steps) |
 | `03-cpp-sfml-graphics` | `struct Stack` | `cin` before window | ↑ / ↓ keys (50ms steps) |
 | `04-cpp-windows-color` | `struct Peg` | `cin` prompt | 1/2/3 Sleep levels |
 | `05-java-console` | `class Peg` (inner) | `Scanner` prompt | — (instant print) |
