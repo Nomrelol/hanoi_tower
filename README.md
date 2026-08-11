@@ -1,73 +1,78 @@
-# Tower of Hanoi - Professional Project Workspace
+# Tower of Hanoi
 
-This repository contains all implementations of the **Tower of Hanoi** problem organized according to professional software engineering standards (kebab-case directory naming, isolated `bin/` build outputs, and zero-pollution source trees).
-
-> 📘 **Detailed Technical Guide**: Read [CHALLENGES_AND_SOLUTIONS.md](file:///c:/Users/Dell/Desktop/proj/CHALLENGES_AND_SOLUTIONS.md) for a full breakdown of compiler ABI mangling (GCC vs MSVC), custom stack algorithms, viva defense notes, and directory hygiene.
+A collection of five independent implementations of the **Tower of Hanoi** algorithm, each exploring a different rendering approach — from a pure standard-library console visualizer to a fully animated 2D graphics window.
 
 ---
 
-## 📁 Directory Structure & Implementations
+## Implementations
 
-```text
-proj/
-├── 01-cpp-iostream/        # Pure C++ (#include <iostream> ONLY, zero extra headers)
-├── 02-cpp-win32-gui/        # Native Windows Desktop GUI Window (-lgdi32, zero 3rd-party downloads)
-├── 03-cpp-sfml-graphics/    # SFML 2D GUI Window Animation + 1-click build.bat
-├── 04-cpp-windows-color/    # Console colorful visualizer (<windows.h> + Sleep)
-├── 05-java-console/         # Pure Java implementation (TowerOfHanoi.java)
-├── CHALLENGES_AND_SOLUTIONS.md  # Complete technical challenge & ABI guide
-└── README.md                # Project hub overview
+```
+├── 01-cpp-iostream/        C++ console visualizer  (stdlib only, no extra headers)
+├── 02-cpp-win32-gui/       C++ native Windows GUI  (Win32 GDI, no third-party libs)
+├── 03-cpp-sfml-graphics/   C++ animated 2D window  (SFML, automated build script)
+├── 04-cpp-windows-color/   C++ color console       (Windows API color + Sleep)
+└── 05-java-console/        Java console visualizer (custom stack, no java.util.Stack)
 ```
 
+Each module is self-contained: its own source file, its own `bin/` output directory, and its own `EXPLANATION.md`.
+
 ---
 
-## 🔑 Key Design Decisions
+## Data Structure
 
-| Module | Custom Stack Name | Disk Input | Speed Control |
+Every implementation builds its own array-based stack from scratch — no standard container libraries (`std::stack`, `std::vector`, `java.util.Stack`) are used anywhere.
+
+| Module | Stack Type | Array Field | Read Method |
 |---|---|---|---|
-| `01-cpp-iostream` | `struct Rod` | `cin` prompt | 1/2/3 spin-loop levels |
-| `02-cpp-win32-gui` | `struct Tower` | Keys 1–8 in window | ↑ / ↓ keys (100ms steps) |
-| `03-cpp-sfml-graphics` | `struct Stack` | `cin` before window | ↑ / ↓ keys (50ms steps) |
-| `04-cpp-windows-color` | `struct Peg` | `cin` prompt | 1/2/3 Sleep levels |
-| `05-java-console` | `class Peg` (inner) | `Scanner` prompt | — (instant print) |
-
-Each C++ version uses **a different struct name** to demonstrate that they were written independently, not copied from each other.
+| `01-cpp-iostream` | `struct Rod` | `d[10]` | `diskAt(lvl)` |
+| `02-cpp-win32-gui` | `struct Tower` | `d[8]` | `at(lvl)` |
+| `03-cpp-sfml-graphics` | `struct Stack` | `arr[8]` | `getAt(lvl)` |
+| `04-cpp-windows-color` | `struct Peg` | `d[10]` | `diskAt(lvl)` |
+| `05-java-console` | `class Peg` (inner) | `disk[]` | `get(i)` |
 
 ---
 
-## 🚀 How to Run Each Implementation
+## How to Build & Run
 
-### 1. Pure C++ (`iostream` ONLY)
+### 01 — C++ Standard Library Only
 ```powershell
 cd 01-cpp-iostream
 g++ main.cpp -o bin/hanoi-iostream.exe
 .\bin\hanoi-iostream.exe
 ```
 
-### 2. Native Windows Desktop GUI Window (Zero Setup!)
+### 02 — Native Windows GUI
 ```powershell
 cd 02-cpp-win32-gui
 g++ main.cpp -o bin/hanoi-win32-gui.exe -lgdi32 -mwindows
 .\bin\hanoi-win32-gui.exe
 ```
 
-### 3. SFML 2D Graphical Animation
+### 03 — SFML 2D Animated Window
 ```powershell
 cd 03-cpp-sfml-graphics
 .\build.bat
 .\bin\hanoi-sfml.exe
 ```
 
-### 4. Windows Colored Console
+### 04 — Windows Color Console
 ```powershell
 cd 04-cpp-windows-color
 g++ main.cpp -o bin/hanoi-win-color.exe
 .\bin\hanoi-win-color.exe
 ```
 
-### 5. Java Version
+### 05 — Java Console
 ```powershell
 cd 05-java-console
 javac -d bin TowerOfHanoi.java
 java -cp bin TowerOfHanoi
 ```
+
+---
+
+## Requirements
+
+- **C++ modules**: MinGW GCC (`g++` on PATH)
+- **SFML module**: GCC-built SFML 2.6 already placed in `03-cpp-sfml-graphics/SFML/`
+- **Java module**: JDK 8 or later

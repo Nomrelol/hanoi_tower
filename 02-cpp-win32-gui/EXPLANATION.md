@@ -1,57 +1,37 @@
-# 02-cpp-win32-gui — Native Windows GUI Visualizer
+# 02-cpp-win32-gui
 
-**File**: [main.cpp](file:///c:/Users/Dell/Desktop/proj/02-cpp-win32-gui/main.cpp)
+Native Windows GUI visualizer using Win32 GDI. No third-party libraries required.
 
-> [!NOTE]
-> Uses **native Windows GDI** (`<windows.h>` only). Zero third-party downloads.  
-> Compiles with `-lgdi32 -mwindows` — standard flags on every Windows MinGW install.
-
----
-
-## Compile & Run
+## Build
 ```powershell
-cd 02-cpp-win32-gui
 g++ main.cpp -o bin/hanoi-win32-gui.exe -lgdi32 -mwindows
 .\bin\hanoi-win32-gui.exe
 ```
 
----
+## Controls
 
-## Runtime Controls
 | Key | Action |
 |---|---|
 | `1` – `8` | Select number of disks |
 | `SPACE` | Start animation |
-| `↑` | Speed up (−100ms) |
-| `↓` | Slow down (+100ms) |
-| `R` | Reset puzzle |
+| `↑` | Speed up (−100ms per step) |
+| `↓` | Slow down (+100ms per step) |
+| `R` | Reset |
 
----
+## Design
 
-## What the code does
+**`struct Tower`** — array-based stack. Same push/pop/at pattern as the other modules.
 
-1. **`struct Tower`** — array-based stack with `d[8]` and `top = -1`.  
-   Same push/pop concept as `Rod` in `01-cpp-iostream` but independently written with different field naming.
+**`paint(HDC)`** — renders into an off-screen memory bitmap using `CreateCompatibleDC` + `CreateCompatibleBitmap`, then copies to the screen in one `BitBlt` call. This double-buffering prevents flicker during animation.
 
-2. **`paint(HDC)`** — draws the full scene into a memory bitmap (`CreateCompatibleDC` + `CreateCompatibleBitmap`) then blits it to the screen in one `BitBlt` call — eliminates flicker.
+**`WndProc`** — standard Windows message procedure. Handles `WM_PAINT`, `WM_KEYDOWN`, and `WM_DESTROY`. On destroy, sets `g_hwnd = NULL` before posting the quit message.
 
-3. **`WndProc`** — Windows message callback:
-   - `WM_PAINT` → calls `paint()`
-   - `WM_KEYDOWN` → handles 1–8 (disk select), SPACE (start), ↑/↓ (speed), R (reset)
-   - `WM_DESTROY` → sets `g_hwnd = NULL` then calls `PostQuitMessage(0)`
+**`g_hwnd` + `IsWindow()`** — the global handle is checked with `IsWindow()` before every repaint inside the animation loop. If the window is closed while the solver is running, animation stops cleanly rather than crashing on a dangling handle.
 
-4. **`g_hwnd` + `IsWindow()`** — a global window handle checked before every draw call inside `moveDisk`. If the user closes the window mid-animation, `solve()` detects it and stops immediately instead of crashing.
+**`solve(k, src, aux, dst)`** — recursive Tower of Hanoi. Each disk move calls `moveDisk`, which repaints the window and sleeps for `delayMs` milliseconds.
 
-5. **`solve(k, src, aux, dst)`** — standard recursive Tower of Hanoi; each base-case move calls `moveDisk` which repaints and calls `Sleep(delayMs)`.
+## Notes
 
----
-
-## Teacher Viva Q&A
-
-| Question | Answer |
-|---|---|
-| What is `WinMain`? | Windows entry point instead of `main()` when using `-mwindows` |
-| What is double-buffering? | Drawing to an off-screen bitmap then copying avoids screen flicker |
-| Why `g_hwnd` global? | So `moveDisk` can safely check `IsWindow()` if the user closes mid-animation |
-| Why `& ~WS_THICKFRAME`? | Removes the resize border so the window stays a fixed size |
-| Why `-lgdi32`? | Links the GDI (Graphics Device Interface) system library for drawing |
+- `WinMain` is the entry point for GUI subsystem builds (`-mwindows`). It replaces the standard `main()`.
+- `-lgdi32` links the Windows Graphics Device Interface library, which provides `CreateCompatibleDC`, `BitBlt`, `FillRect`, etc.
+- `& ~WS_THICKFRAME & ~WS_MAXIMIZEBOX` removes the resize and maximize controls so the window stays a fixed size.

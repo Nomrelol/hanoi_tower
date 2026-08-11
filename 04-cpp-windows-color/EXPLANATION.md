@@ -1,42 +1,25 @@
-# 04-cpp-windows-color — Windows Colorful Console Visualizer
+# 04-cpp-windows-color
 
-**File**: [main.cpp](file:///c:/Users/Dell/Desktop/proj/04-cpp-windows-color/main.cpp)
+Color console visualizer using Windows API. Each disk is printed in a distinct color using `SetConsoleTextAttribute`.
 
-> [!NOTE]
-> Uses `<windows.h>` for `SetConsoleTextAttribute` (colored text) and `Sleep` (delay).  
-> No third-party library — works out of the box on any Windows machine.
-
----
-
-## Compile & Run
+## Build
 ```powershell
-cd 04-cpp-windows-color
 g++ main.cpp -o bin/hanoi-win-color.exe
 .\bin\hanoi-win-color.exe
 ```
 
----
+## Design
 
-## What the code does
+**`struct Peg`** — array-based stack. `d[10]` stores disk sizes, `top` tracks the height. `diskAt(lvl)` reads any level for rendering.
 
-1. **`struct Peg`** — array-based stack using `d[10]` and `top = -1`.  
-   Fields and method names are intentionally different from the other versions (`d` instead of `arr`, `diskAt` instead of `getAt`, etc.).
+**`color(int c)`** — wraps `SetConsoleTextAttribute`. Windows console color codes 0–15 map to specific colors; codes 9–14 are the bright variants used for the disks.
 
-2. **`color(int c)`** — calls `SetConsoleTextAttribute` to change the terminal text colour. Windows console color codes go from 0 (black) to 15 (white); codes 9–14 give bright colours per disk.
+**`draw()`** — clears with `system("cls")`, then loops over each level from top to bottom. For each rod at that level, it prints a disk shape `<===3===>` in the corresponding color, or a `|` for an empty slot.
 
-3. **`draw()`** — calls `system("cls")` to clear, then loops over each disk level and rod, printing coloured disk shapes `<===3===>` using `color()` + `cout`.
+**`solve(k, src, aux, dst)`** — standard recursive algorithm. `move()` pops from the source, pushes to the destination, increments the step counter, and calls `draw()` followed by `Sleep(delayMs)`.
 
-4. **Speed selection** — user picks 1 (fast: 200ms), 2 (medium: 500ms), or 3 (slow: 900ms) at startup.
+## Notes
 
-5. **`solve(k, src, aux, dst)`** — standard Tower of Hanoi recursion, calling `move()` at the base case.
-
----
-
-## Teacher Viva Q&A
-
-| Question | Answer |
-|---|---|
-| What is `SetConsoleTextAttribute`? | A Windows API function that changes the foreground/background colour of console text |
-| Why `system("cls")`? | Clears the terminal screen between steps to simulate animation |
-| What does color code `14` mean? | Bright yellow (Windows console palette) |
-| Why `volatile` is NOT needed here? | We use `Sleep()` instead of a spin loop, so the compiler can't optimize it away |
+- `system("cls")` is used to clear the screen between steps, producing a step-by-step animation effect in the terminal.
+- `Sleep()` comes from `<windows.h>` and pauses the process for an exact millisecond count, unlike the spin-loop approach in `01-cpp-iostream`.
+- Color code `14` is bright yellow; code `10` is bright green; code `11` is bright cyan.

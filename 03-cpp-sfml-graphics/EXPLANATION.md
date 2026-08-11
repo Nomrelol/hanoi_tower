@@ -1,62 +1,42 @@
-# 03-cpp-sfml-graphics — SFML 2D Animated Visualizer
+# 03-cpp-sfml-graphics
 
-**File**: [main.cpp](file:///c:/Users/Dell/Desktop/proj/03-cpp-sfml-graphics/main.cpp)
+Animated 2D visualizer using SFML. Each disk move is rendered as a three-phase smooth animation: lift, slide, drop.
 
-> [!NOTE]
-> Requires the SFML GCC MinGW build already placed in `03-cpp-sfml-graphics/SFML/`.  
-> Run `build.bat` — it compiles and copies the needed DLLs automatically.
-
----
-
-## Compile & Run
+## Build
 ```powershell
-cd 03-cpp-sfml-graphics
 .\build.bat
 .\bin\hanoi-sfml.exe
 ```
-*Console asks for disk count first, then the animated window opens.*
 
----
+The script compiles with the correct `-I`/`-L` paths and copies the required DLLs to `bin/` automatically.
 
-## What the code does
+## Controls
 
-1. **`struct Stack`** — custom array stack (same idea as `Rod`/`Tower`/`Peg` in other versions, independently written for SFML context).
-
-2. **`renderScene(window, font)`** — draws background, base platform, three rods, all disks as coloured rectangles using `sf::RectangleShape`, plus HUD text.
-
-3. **`animateMove(...)`** — three-phase smooth animation per disk move:
-   - Phase 1: Lift disk straight up
-   - Phase 2: Slide horizontally to target rod
-   - Phase 3: Drop disk down onto stack
-   Each phase uses a `smoothstep` easing curve for realistic motion.
-
-4. **`solveHanoiSFML(window, n, ...)`** — recursive solver that calls `animateMove` instead of an instant move.
-
-5. **Keyboard controls** (while window is open):
-   - `1`–`8` → change disk count and reset
-   - `SPACE` / `ENTER` → start solving
-   - `↑` / `↓` → adjust animation speed
-   - `R` → reset puzzle
-
----
-
-## Runtime Controls
 | Key | Action |
 |---|---|
-| `1`–`8` | Select number of disks |
+| `1` – `8` | Select number of disks |
 | `SPACE` or `ENTER` | Start solving |
 | `↑` | Speed up (−50ms) |
 | `↓` | Slow down (+50ms) |
-| `R` | Reset puzzle |
+| `R` | Reset |
 
----
+## Design
 
-## Teacher Viva Q&A
+**`struct Stack`** — array-based stack. Identical concept to the other modules.
 
-| Question | Answer |
-|---|---|
-| What is SFML? | Simple and Fast Multimedia Library — a C++ library for 2D graphics |
-| Why `smoothstep`? | Gives ease-in/ease-out motion instead of robotic constant speed |
-| What does `setOrigin` do? | Sets the reference point of the shape so it centres properly on the rod |
-| Why a `build.bat`? | SFML needs `-I` include path and `-L` lib path — the script handles it automatically |
-| Why GCC MinGW SFML specifically? | SFML `.a` libs must match the compiler ABI; MSVC `.lib` files don't work with `g++` |
+**`renderScene(window, font)`** — draws the background, base platform, three rods, and all disks as `sf::RectangleShape` objects. Disk width scales with disk size; each disk is centered on its rod using `setOrigin`.
+
+**`animateMove(...)`** — moves one disk in three phases, each timed by `sf::Clock`:
+1. Lift straight up to a peak height above all rods
+2. Slide horizontally to the target rod's X position
+3. Drop down to the correct stack height
+
+Each phase uses a `smoothstep` curve: `t² × (3 − 2t)`. This gives ease-in at the start and ease-out at the end, producing natural-looking motion.
+
+**`solveHanoiSFML(...)`** — recursive solver that calls `animateMove` at each step instead of an instant stack swap.
+
+## Notes
+
+- SFML must be built for the same GCC version as the system compiler. MSVC-built SFML `.lib` files are not compatible with MinGW `g++` due to ABI differences.
+- `smoothstep` is implemented inline; it does not require `<cmath>`.
+- The window remains responsive during animation because `processEvents` is called inside each animation phase loop.

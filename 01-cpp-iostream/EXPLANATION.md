@@ -1,57 +1,33 @@
-# 01-cpp-iostream — Pure C++ Console Visualizer
+# 01-cpp-iostream
 
-**File**: [main.cpp](file:///c:/Users/Dell/Desktop/proj/01-cpp-iostream/main.cpp)
+C++ console visualizer using only `#include <iostream>`. No platform-specific headers, no external libraries.
 
-> [!NOTE]
-> **Only `#include <iostream>`** — zero other headers. No `<windows.h>`, no `<vector>`, no `<stack>`.  
-> This is the teacher-safe version: trivial to compile anywhere, trivial to explain line by line.
-
----
-
-## Compile & Run
+## Build
 ```powershell
-cd 01-cpp-iostream
 g++ main.cpp -o bin/hanoi-iostream.exe
 .\bin\hanoi-iostream.exe
 ```
 
----
+## Design
 
-## What the code does
+**`struct Rod`** — array-based stack. `d[10]` holds disk sizes, `top` tracks the current height. `diskAt(lvl)` reads any position in the array, which the drawing function uses to render each level.
 
-1. **`struct Rod`** — a hand-built stack using `int d[10]` and `top = -1`.  
-   - `push`, `pop`, `peek`, `diskAt` — four simple functions, each one line.  
-   - No `std::stack`, no `std::vector`.
+**`draw()`** — clears the screen by printing blank lines, then loops from the bottom level up, printing each rod's disk as `[===3===]` or a `|` for an empty slot.
 
-2. **`draw()`** — clears the screen by printing 35 blank lines (pure `cout`).  
-   Loops from level 0 to level n, printing each rod's disk as `[===3===]` or a `|` for empty.
-
-3. **`solve(n, src, aux, dst)`** — the classic three-line recursion:
-   ```
-   if n == 1 → move directly
-   else → move n-1 to aux, move largest, move n-1 from aux to dst
-   ```
-
-4. **`wait()`** — a spin loop (`volatile long long`) for delay. Chosen by user at startup (fast / medium / slow).
-
----
-
-## What the user sees at runtime
+**`solve(n, src, aux, dst)`** — standard recursive algorithm:
 ```
-Enter number of disks (1-8): 3
-Speed — 1=fast  2=medium  3=slow: 2
-Press ENTER to start...
-[display updates step by step]
-SOLVED IN 7 MOVES!
+solve(n):
+    if n == 1: move directly
+    else:
+        solve(n-1, src → aux)
+        move src → dst
+        solve(n-1, aux → dst)
 ```
 
----
+**`wait()`** — spin loop using `volatile long long` to prevent compiler elimination. The user picks a speed level at startup; this avoids requiring `<windows.h>` or `<chrono>`.
 
-## Teacher Viva Q&A
+## Notes
 
-| Question | Answer |
-|---|---|
-| Why `volatile` in the delay loop? | Prevents the compiler from optimising the empty loop away |
-| Why not use `Sleep()`? | `Sleep()` needs `<windows.h>` — this version is header-free |
-| Why `diskAt(lvl)` instead of `peek()`? | `peek` only reads the top; `diskAt` reads any level for drawing |
-| What is the minimum moves formula? | 2ⁿ − 1 (7 for n=3, 255 for n=8) |
+- `volatile` on the loop counter tells the compiler this variable has side effects and must not be optimized away, even though the loop body is empty.
+- `diskAt(lvl)` is needed because `peek()` only reads the top. The draw function needs to read every level of the stack from bottom to top.
+- Minimum moves for n disks: **2ⁿ − 1**
