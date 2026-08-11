@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class TowerOfHanoi {
 
-    // Custom array-based stack — no java.util.Stack used
+    // Stack implementation for disk peg
     static class Peg {
         int[] disk;
         int   top = -1;
