@@ -4,7 +4,7 @@ using namespace std;
 
 const int MAX = 10;
 
-// Array-based rod stack — built from scratch
+// Stack implementation for disk peg
 struct Peg {
     int d[MAX];
     int top = -1;
