@@ -1,6 +1,6 @@
 # 03-cpp-sfml-graphics
 
-Animated 2D visualizer using SFML. Each disk move is rendered as a three-phase smooth animation: lift, slide, drop.
+Animated 2D visualizer using SFML. Each disk move is a three-phase animation: lift → slide → drop.
 
 ## Build
 ```powershell
@@ -8,35 +8,27 @@ Animated 2D visualizer using SFML. Each disk move is rendered as a three-phase s
 .\bin\hanoi-sfml.exe
 ```
 
-The script compiles with the correct `-I`/`-L` paths and copies the required DLLs to `bin/` automatically.
-
 ## Controls
 
 | Key | Action |
 |---|---|
-| `1` – `8` | Select number of disks |
-| `SPACE` or `ENTER` | Start solving |
-| `↑` | Speed up (−50ms) |
-| `↓` | Slow down (+50ms) |
-| `R` | Reset |
+| `SPACE` | Start solving / Pause/Resume animation |
+| Close button | Exit |
 
-## Design
+## Code Structure (~175 lines)
 
-**`struct Stack`** — array-based stack. Identical concept to the other modules.
+**`struct Stack`** — custom array-based stack with `push`, `pop`, `size`, `at`, `clear`. No `std::stack` used.
 
-**`renderScene(window, font)`** — draws the background, base platform, three rods, and all disks as `sf::RectangleShape` objects. Disk width scales with disk size; each disk is centered on its rod using `setOrigin`.
+**`drawScene(win)`** — clears the window (black background), draws base platform, three rods, and stacked disks. Does NOT call `display()` — the caller handles that so animated disks can be drawn on top.
 
-**`animateMove(...)`** — moves one disk in three phases, each timed by `sf::Clock`:
-1. Lift straight up to a peak height above all rods
-2. Slide horizontally to the target rod's X position
+**`animateMove(win, src, dst)`** — moves one disk in three phases, each timed by `sf::Clock`:
+1. Lift straight up above the rods
+2. Slide horizontally to the target rod
 3. Drop down to the correct stack height
 
-Each phase uses a `smoothstep` curve: `t² × (3 − 2t)`. This gives ease-in at the start and ease-out at the end, producing natural-looking motion.
+Each phase uses linear interpolation: `position = start + (end - start) * progress`.
 
-**`solveHanoiSFML(...)`** — recursive solver that calls `animateMove` at each step instead of an instant stack swap.
+**`solve(win, n, src, aux, dst)`** — recursive solver. Calls `animateMove` at each step.
 
-## Notes
+**`main()`** — asks for disk count via console, creates the SFML window, waits for SPACE to start, runs the solver, then keeps the window open.
 
-- SFML must be built for the same GCC version as the system compiler. MSVC-built SFML `.lib` files are not compatible with MinGW `g++` due to ABI differences.
-- `smoothstep` is implemented inline; it does not require `<cmath>`.
-- The window remains responsive during animation because `processEvents` is called inside each animation phase loop.
